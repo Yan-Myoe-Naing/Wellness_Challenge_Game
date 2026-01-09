@@ -1,0 +1,199 @@
+const model = require("../models/diplomacyRequestModel");
+
+// Get all requests
+module.exports.readAllDiplomacyRequest = (req, res, next) => {
+  const callback = (error, results, fields) => {
+    if (error) {
+      console.log("Error readAllRequests:", error);
+      return res
+        .status(500)
+        .json({
+          message: "Internal server error in getting all diplomacy requests",
+        });
+    } else {
+      res.locals.allRequests = results;
+      next();
+    }
+  };
+
+  model.selectAll(callback);
+};
+
+//Get army with ID
+module.exports.readDiplomacyRequestById = (req, res, next) => {
+  const data = {
+    request_id: req.params.request_id || res.locals.requestId,
+  };
+
+  const callback = (error, results, fields) => {
+    if (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({
+          message: "Internal server error in getting diplomacy request by ID",
+        });
+    } else {
+      if (results.length == 0) {
+        res.status(404).json({ message: "Diplomacy request not found" });
+      } else {
+        res.locals.senderId = results[0].sender_id;
+        res.locals.request = results[0];
+        next();
+      }
+    }
+  };
+
+  model.selectById(data, callback);
+};
+
+// Get request with user_id
+module.exports.readDiplomacyRequestByUserId = (req, res, next) => {
+  const data = {
+    user_id: res.locals.receiverId || res.locals.senderId || req.params.user_id,
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      return res
+        .status(500)
+        .json({
+          message: "Internal server error in getting request for user_id",
+        });
+    } else {
+      if (res.locals.diplomacyRequestForUser == undefined) {
+        res.locals.diplomacyRequestForUser = [];
+      }
+
+      res.locals.diplomacyRequestForUser =
+        res.locals.diplomacyRequestForUser.concat(results);
+
+      next();
+    }
+  };
+
+  model.selectByUserId(data, callback);
+};
+
+// Get pending requests by user_id
+module.exports.readPendingRequestByUserId = (req, res, next) => {
+  const data = {
+    user_id: res.locals.receiverId || res.locals.senderId || req.params.user_id,
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      return res
+        .status(500)
+        .json({
+          message:
+            "Internal server error in getting pending request for user_id",
+        });
+    } else {
+      if (results.length === 0) {
+        return res
+          .status(404)
+          .json({
+            message: "No pending diplomacy requests found for this user",
+          });
+      } else {
+        if (res.locals.diplomacyRequestForUser == undefined) {
+          res.locals.diplomacyRequestForUser = [];
+        }
+
+        res.locals.diplomacyRequestForUser =
+          res.locals.diplomacyRequestForUser.concat(results);
+
+        next();
+      }
+    }
+  };
+
+  model.selectPendingByUserId(data, callback);
+};
+
+// Create new request
+module.exports.createNewDiplomacyRequest = (req, res, next) => {
+  const senderId = req.params.user_id;
+  const receiverId = req.body.target_id;
+  const type = req.params.type;
+
+  if (senderId == undefined || receiverId == undefined || type == undefined) {
+    return res
+      .status(400)
+      .json({ message: "sender_id, receiver_id, and type are required" });
+  }
+
+  const data = {
+    sender_id: senderId,
+    receiver_id: receiverId,
+    type,
+    status: "pending",
+  };
+
+  const callback = (error, results, fields) => {
+    if (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error creating diplomacy request" });
+    } else {
+      res.locals.requestId = results.insertId;
+      next();
+    }
+  };
+
+  model.insertRequest(data, callback);
+};
+
+// Create new war request
+module.exports.createNewWar = (req, res, next) => {
+  if (req.params.user_id == undefined || req.body.target_id == undefined) {
+    return res
+      .status(400)
+      .json({ message: "sender_id and receiver_id are required" });
+  }
+
+  const data = {
+    sender_id: req.params.user_id,
+    receiver_id: req.body.target_id,
+    type: "war",
+    status: "accepted", // war is immediate
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error declaring war" });
+    }
+    res.locals.requestId = results.insertId;
+    next();
+  };
+
+  model.insertRequest(data, callback);
+};
+
+// Update diplomacy request by Id
+module.exports.updateDiplomacyRequestById = (req, res, next) => {
+  const data = {
+    request_id: req.params.request_id || res.locals.requestId,
+    status: req.params.status, // will be "accepted" or "rejected" from the route
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error updating diplomacy request" });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "Diplomacy request not found" });
+    }
+    next();
+  };
+
+  model.updateById(data, callback);
+};

@@ -1,0 +1,27 @@
+{
+  "name": "bed-ca2-yanmyoenaing",
+  "version": "1.0.0",
+  "description": "You are required to build your folder structures for your project.",
+  "main": "index.js",
+  "scripts": {
+    "init_tables": "node src/configs/createSchema.js && node src/configs/initTables.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ST0503-BED/bed-ca2-YanMyoeNaing.git"
+  },
+  "author": "YAN MYOE NAING",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ST0503-BED/bed-ca2-YanMyoeNaing/issues"
+  },
+  "homepage": "https://github.com/ST0503-BED/bed-ca2-YanMyoeNaing#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mysql2": "^3.16.0",
+    "nodemon": "^3.1.11"
+  }
+}
