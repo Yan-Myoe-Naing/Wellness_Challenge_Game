@@ -5,7 +5,11 @@ const cityController = require("../controllers/cityController");
 const armyController = require("../controllers/armyController");
 const cityUtil = require("../utils/cityUtil");
 const armyUtil = require("../utils/armyUtil");
+const bcryptMiddleware = require("../middlewares/bcryptMiddleware")
+const jwtMiddleware = require("../middlewares/jwtMiddleware")
 const { withMessage, sendResponse } = require("../middlewares/response");
+
+// POST /register
 
 // 1. POST /users
 router.post(

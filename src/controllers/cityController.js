@@ -74,7 +74,7 @@ module.exports.createNewCity = (req, res, next) => {
   }
 
   const data = {
-    owner_id: req.params.user_id || res.locals.user,
+    owner_id: res.locals.userId,
     name: req.body.city_name,
     population: res.locals.population,
   };

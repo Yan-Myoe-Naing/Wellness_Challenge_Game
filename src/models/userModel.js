@@ -10,12 +10,12 @@ module.exports.selectAll = (callback) => {
 
 // Insert a new user (only username provided)
 module.exports.insertSingle = (data, callback) => {
-  const SQLSTATMENT = `
-    INSERT INTO User (username)
-    VALUES (?);
-    `;
-  const VALUES = [data.username];
-  pool.query(SQLSTATMENT, VALUES, callback);
+  const SQLSTATEMENT = `
+    INSERT INTO \`User\` (username, password_hash)
+    VALUES (?, ?);
+  `;
+  const VALUES = [data.username, data.password_hash];
+  pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
 // Find a user by username
@@ -57,3 +57,17 @@ module.exports.updatePointsById = (data, callback) => {
   const VALUES = [data.points, data.id];
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Select User by Username
+module.exports.selectUserByUsername = (data, callback) => {
+
+    const SQLSTATEMENT = `
+        SELECT * FROM User 
+        WHERE username = ?
+    `;
+
+    const VALUES = [data.username];
+
+    pool.query(SQLSTATEMENT, VALUES, callback);
+};
+

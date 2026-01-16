@@ -67,23 +67,26 @@ module.exports.checkUsernameUnique = (req, res, next) => {
   model.findByUsername(username, callback);
 };
 
-//Create new user
+
 module.exports.createNewUser = (req, res, next) => {
   const data = {
     username: req.body.username,
+    password_hash: res.locals.hash   
   };
 
   const callback = (error, results) => {
     if (error) {
       return res.status(500).json({ message: "Error inserting user" });
     } else {
-      res.locals.user = { id: results.insertId };
+      res.locals.userId = results.insertId;
+      res.locals.user = { id: results.insertId, username: req.body.username };
       next();
     }
   };
 
   model.insertSingle(data, callback);
 };
+
 
 //Update User
 module.exports.updateUser = (req, res, next) => {
@@ -156,4 +159,49 @@ module.exports.readUserByArmy = (req, res, next) => {
   };
 
   model.selectById(data, callback);
+};
+
+
+// Login
+// This retrieves related User data by username for comparing later
+module.exports.login = (req, res, next) => {
+
+    // 400 Check for all expected input 
+    if (req.body.username == undefined ||
+        req.body.password == undefined) {
+        return res.status(400).json({message: "Username or password is missing."});
+    }
+
+    // We only need username to get all the User data first
+    const data = {
+        username: req.body.username
+    };
+
+
+    const callback = (error, results) => {
+
+        if (error) {
+            console.log(error);
+            return res.status(500).json({message: "Internal server error"});
+        } 
+        
+        else {
+            
+            // If results.length == 0, that means no such user was found.
+            if (results.length == 0) {
+                return res.status(404).json({message: "User not found"});
+            } 
+
+            else {
+                // For comparePassword: hashed password is saved into res.locals.hash
+                res.locals.hash = results[0].password_hash;
+                // For generateToken: Matching userId for input username is saved. 
+                res.locals.userId = results[0].id;
+
+                next();
+            }
+        }
+    };
+  
+    model.selectUserByUsername(data, callback);
 };
