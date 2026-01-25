@@ -2,13 +2,28 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/diplomacyRequestController");
 const diplomacyController = require("../controllers/diplomacyController");
-const diplomacyRequestUtil = require("../utils/diplomacyRequestUtil");
-const responseUtil = require("../utils/responseUtil");
+const diplomacyRequestMiddleware = require("../middlewares/diplomacyRequestMiddleware");
+const jwtMiddleware = require("../middlewares/jwtMiddleware")
+const responseMiddleware = require("../middlewares/responseMiddleware");
 const {
   withMessage,
   withDynamicMessage,
   sendResponse,
 } = require("../middlewares/response");
+
+
+// GET /diplomacyRequests/pendingRequest
+router.get(
+  "/pendingRequest",
+  jwtMiddleware.verifyToken,
+  controller.readPendingRequestByUserId, 
+  withDynamicMessage(
+    (req, res) => `Pending diplomacy requests for user ${res.locals.userId}:`,
+    200,
+  ),
+  sendResponse,
+);
+
 
 // GET /diplomacyRequests
 router.get(
@@ -29,111 +44,124 @@ router.get(
   sendResponse,
 );
 
-// GET /diplomacyRequests/users/:user_id/pendingRequest
-router.get(
-  "/users/:user_id/pendingRequest",
-  controller.readPendingRequestByUserId, // custom controller logic
-  withDynamicMessage(
-    (req, res) => `Pending diplomacy requests for user ${req.params.user_id}:`,
-    200,
-  ),
-  sendResponse,
-);
 
-// POST /diplomacyRequests/users/:user_id/war
+// POST /diplomacyRequests/war
 router.post(
-  "/users/:user_id/war",
-  diplomacyRequestUtil.setSenderAsUser,
+  "/war",
+  jwtMiddleware.verifyToken,
+  diplomacyRequestMiddleware.setSenderAsUser,
   diplomacyController.readDiplomacyByUserId,
   controller.readDiplomacyRequestByUserId,
-  diplomacyRequestUtil.setReceiverAsUser,
+  diplomacyRequestMiddleware.setReceiverAsUser,
   diplomacyController.readDiplomacyByUserId,
   controller.readDiplomacyRequestByUserId,
-  diplomacyRequestUtil.checkTwoUsers,
-  diplomacyRequestUtil.validateForWar, // block if alliance/peace exists
-  controller.createNewWar, // insert into DiplomacyRequest table
-  diplomacyController.createNewWar, // insert into Diplomacy table
+  diplomacyRequestMiddleware.checkTwoUsers,
+  diplomacyRequestMiddleware.validateForWar, 
+  controller.createNewWar, 
+  diplomacyController.createNewWar,
   controller.readDiplomacyRequestById,
   diplomacyController.readDiplomacyById,
-  responseUtil.formatDiplomacyRequestResponse,
+  responseMiddleware.formatDiplomacyRequestResponse,
   withDynamicMessage(
-    (req) =>
-      `War declared by user ${req.params.user_id} against user ${req.body.target_id}.`,
+    (req,res) =>
+      `War declared against user ${req.body.target_id}.`,
     201,
   ),
   sendResponse,
 );
 
-// POST /diplomacyRequests/users/:user_id/:type
+
+// POST /diplomacyRequests/alliance
 router.post(
-  "/users/:user_id/:type",
-  diplomacyRequestUtil.setSenderAsUser,
+  "/alliance",
+  jwtMiddleware.verifyToken,
+  diplomacyRequestMiddleware.setSenderAsUser,
   diplomacyController.readDiplomacyByUserId,
   controller.readDiplomacyRequestByUserId,
-  diplomacyRequestUtil.setReceiverAsUser,
+  diplomacyRequestMiddleware.setReceiverAsUser,
   diplomacyController.readDiplomacyByUserId,
   controller.readDiplomacyRequestByUserId,
-  diplomacyRequestUtil.checkTwoUsers,
-  (req, res, next) => {
-    if (req.params.type === "alliance") {
-      return diplomacyRequestUtil.validateForAlliance(req, res, next);
-    }
-    if (req.params.type === "peace") {
-      return diplomacyRequestUtil.validateForPeace(req, res, next);
-    }
-    return res.status(400).json({ message: "Invalid diplomacy type" });
-  },
-  controller.createNewDiplomacyRequest,
+  diplomacyRequestMiddleware.checkTwoUsers,
+  diplomacyRequestMiddleware.validateForAlliance,
+  controller.createNewDiplomacyRequest("alliance"),
   controller.readDiplomacyRequestById,
-  responseUtil.formatDiplomacyRequestResponse,
+  responseMiddleware.formatDiplomacyRequestResponse,
   withDynamicMessage(
     (req, res) =>
-      `${req.params.type} request created by user ${req.params.user_id} to user ${req.body.target_id}.`,
+      `Alliance request created by user to user ${req.body.target_id}.`,
     201,
   ),
   sendResponse,
 );
 
-//PUT /diplomacyRequests/:request_id/:status
-router.put(
-  "/:request_id/:status",
+
+// POST /diplomacyRequests/users/:user_id/peace
+router.post(
+  "/peace",
+  jwtMiddleware.verifyToken,
+  diplomacyRequestMiddleware.setSenderAsUser,
+  diplomacyController.readDiplomacyByUserId,
+  controller.readDiplomacyRequestByUserId,
+  diplomacyRequestMiddleware.setReceiverAsUser,
+  diplomacyController.readDiplomacyByUserId,
+  controller.readDiplomacyRequestByUserId,
+  diplomacyRequestMiddleware.checkTwoUsers,
+  diplomacyRequestMiddleware.validateForPeace,
+  controller.createNewDiplomacyRequest("peace"),
   controller.readDiplomacyRequestById,
-  diplomacyRequestUtil.checkRequestStatus, // must be pending
-  (req, res, next) => {
-    // normalize status param
-    const status = req.params.status;
-    if (status !== "accepted" && status !== "rejected") {
-      return res
-        .status(400)
-        .json({ message: "Invalid status. Must be 'accepted' or 'rejected'." });
-    }
-    res.locals.updateStatus = status;
-    next();
-  },
-  controller.updateDiplomacyRequestById,
-  (req, res, next) => {
-    if (res.locals.updateStatus === "rejected") {
-      return controller.readDiplomacyRequestById(req, res, () => {
-        // after re-read, send response and STOP
-        return res.json({
-          message: `Diplomacy request ${req.params.request_id} rejected.`,
-          data: { request: res.locals.request },
-        });
-      });
-    }
-    next();
-  },
-  diplomacyRequestUtil.checkWarBetweenTwoUsers,
+  responseMiddleware.formatDiplomacyRequestResponse,
+  withDynamicMessage(
+    (req, res) =>
+      `Peace request created by user to user ${req.body.target_id}.`,
+    201,
+  ),
+  sendResponse,
+);
+
+
+
+
+
+
+//PUT /diplomacyRequests/:request_id/accepted
+router.put(
+  "/:request_id/accepted",
+  jwtMiddleware.verifyToken,
+  controller.readDiplomacyRequestById,
+  diplomacyRequestMiddleware.verifyRequestOwnership,
+  diplomacyController.readDiplomacyByUserId,  
+  diplomacyRequestMiddleware.checkRequestStatus,
+  controller.updateDiplomacyRequestById("accepted"),
+  diplomacyRequestMiddleware.checkWarBetweenTwoUsers,
   diplomacyController.deleteDiplomacyById,
   diplomacyController.createNewDiplomacy,
-  controller.readDiplomacyRequestById, // re-read updated request
-  diplomacyController.readDiplomacyById, // read new diplomacy record
-  responseUtil.formatDiplomacyAcceptResponse,
+  controller.readDiplomacyRequestById, 
+  diplomacyController.readDiplomacyById, 
+  responseMiddleware.formatDiplomacyAcceptResponse,
   withDynamicMessage(
     (req, res) => `Diplomacy request ${req.params.request_id} accepted.`,
     200,
   ),
   sendResponse,
 );
+
+//PUT /diplomacyRequests/:request_id/rejected
+router.put(
+  "/:request_id/rejected",
+  jwtMiddleware.verifyToken,
+  controller.readDiplomacyRequestById,
+  diplomacyRequestMiddleware.verifyRequestOwnership,
+  diplomacyRequestMiddleware.checkRequestStatus,
+  controller.updateDiplomacyRequestById("rejected"),
+  controller.readDiplomacyRequestById, 
+  responseMiddleware.formatDiplomacyAcceptResponse,
+  withDynamicMessage(
+    (req, res) => `Diplomacy request ${req.params.request_id} rejected.`,
+    200,
+  ),
+  sendResponse,
+);
+
+
 
 module.exports = router;

@@ -2,7 +2,6 @@
 module.exports.changePointToCity = (req, res, next) => {
   const user = res.locals.user; // comes from readUserById
   const requiredPoints = 50; // cost to create a city
-
   // Block if user does not have enough points
   if (user.points < requiredPoints) {
     return res

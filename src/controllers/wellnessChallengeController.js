@@ -4,7 +4,6 @@ const model = require("../models/wellnessChallengeModel.js");
 module.exports.createNewChallenge = (req, res, next) => {
   if (
     req.body.description == undefined ||
-    req.body.user_id == undefined ||
     req.body.points == undefined
   ) {
     return res.status(400).json({ message: "Error: data is undefined" });
@@ -12,12 +11,13 @@ module.exports.createNewChallenge = (req, res, next) => {
 
   const data = {
     description: req.body.description,
-    creator_id: req.body.user_id,
+    creator_id: res.locals.userId,
     points: req.body.points,
   };
 
   const callback = (error, results) => {
     if (error) {
+      console.log(error)
       return res.status(500).json({ message: "Error inserting challenge" });
     } else {
       res.locals.challenge = { id: results.insertId };
@@ -70,46 +70,25 @@ module.exports.readAllChallenges = (req, res, next) => {
   model.selectAll(callback);
 };
 
-//delete challenge
-module.exports.deleteChallengeById = (req, res, next) => {
-  const data = {
-    challenge_id: req.params.challenge_id,
-  };
-
-  const callback = (error, results, fields) => {
-    if (error) {
-      console.log("Error deleteChallengeById:", error);
-      res.status(500).json(error);
-    } else {
-      if (results.affectedRows == 0) {
-        res.status(404).json({
-          message: "Challenge not found",
-        });
-      } else next(); // 204 No Content
-    }
-  };
-
-  model.deleteById(data, callback);
-};
 
 //updateUser
 module.exports.updateChallenge = (req, res, next) => {
   if (
-    req.body.user_id == undefined ||
+    res.locals.userId == undefined ||
     req.body.description == undefined ||
     req.body.points == undefined
   ) {
     return res.status(400).json({ message: "Error: data is undefined" });
   }
 
-  if (res.locals.challenge.creator_id != req.body.user_id) {
+  if (res.locals.challenge.creator_id != res.locals.userId) {
     return res
       .status(403)
       .json({ message: "Forbidden: not the challenge owner" });
   }
 
   const data = {
-    creator_id: req.body.user_id,
+    creator_id: res.locals.userId,
     description: req.body.description,
     points: req.body.points,
     challenge_id: req.params.challenge_id,
@@ -131,12 +110,12 @@ module.exports.updateChallenge = (req, res, next) => {
 
 //Create new completion
 module.exports.createNewCompletion = (req, res, next) => {
-  if (req.body.user_id == undefined || req.body.details == undefined) {
+  if (req.body.details == undefined) {
     return res.status(400).json({ message: "Error: data is undefined" });
   }
 
   const data = {
-    user_id: req.body.user_id,
+    user_id: res.locals.userId,
     details: req.body.details,
     challenge_id: req.params.challenge_id,
   };
@@ -183,7 +162,7 @@ module.exports.readCompletionById = (req, res, next) => {
 //Add point to related users
 module.exports.addPointsToUser = (req, res, next) => {
   const data = {
-    userId: res.locals.user.id,
+    userId: res.locals.user.id || res.locals.userId,
     points: res.locals.challenge.points,
   };
 

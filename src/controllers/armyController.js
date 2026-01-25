@@ -25,7 +25,7 @@ module.exports.readArmyById = (role) => (req, res, next) => {
   } else if (role === "defender") {
     armyId = res.locals.defenderArmyId;
   } else {
-    armyId = res.locals.armyId;
+    armyId = res.locals.armyId || req.params.army_id;
   }
 
   const data = {
@@ -144,6 +144,9 @@ module.exports.updateArmyById = (req, res, next) => {
 
 // Update army power for battle
 module.exports.updateArmyPower = (req, res, next) => {
+  if (res.locals.battleResult != "defenderWins"){
+    return next()
+  }
   const defenderArmy = res.locals.defenderArmy;
 
   let currentPower = Number(defenderArmy.army_power) || 0;
@@ -213,6 +216,9 @@ module.exports.reduceArmySize = (req, res, next) => {
 
 // Delete army as battle outcome
 module.exports.deleteArmyById = (req, res, next) => {
+  if (
+      res.locals.battleResult != "attackerWins"    )
+      { return next()}
   const data = {
     army_id: res.locals.defenderArmy?.id,
   };
@@ -226,3 +232,5 @@ module.exports.deleteArmyById = (req, res, next) => {
 
   model.deleteById(data, callback);
 };
+
+

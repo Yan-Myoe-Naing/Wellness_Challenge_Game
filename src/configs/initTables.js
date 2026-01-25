@@ -26,10 +26,10 @@ bcrypt.hash("1234", saltRounds, (err, hash) => {
   DROP TABLE IF EXISTS City;
   DROP TABLE IF EXISTS UserCompletion;
   DROP TABLE IF EXISTS WellnessChallenge;
-  DROP TABLE IF EXISTS \`User\`;
+  DROP TABLE IF EXISTS User;
 
 
-  CREATE TABLE \`User\` (
+  CREATE TABLE User (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -89,14 +89,14 @@ bcrypt.hash("1234", saltRounds, (err, hash) => {
     responded_at DATETIME
   );
 
-  INSERT INTO \`User\` (id, username, password_hash, points) VALUES
+  INSERT INTO User (id, username, password_hash, points) VALUES
   (1, 'Reily', '${hash}', 100),
   (2, 'Zune', '${hash}', 50),
   (3, 'George', '${hash}', 110),
   (4, 'Coco', '${hash}', 0),
   (5, 'Bubugaga', '${hash}', 0),
   (6, 'Luna', '${hash}', 15),
-  (7, 'Kai', '${hash}', 20),
+  (7, 'Kai', '${hash}', 20 ),
   (8, 'Mira', '${hash}', 8);
 
   INSERT INTO WellnessChallenge (id, creator_id, description, points) VALUES
@@ -159,48 +159,6 @@ INSERT INTO Diplomacy (id, initiator_id, responder_id, status) VALUES
 (4, 4, 3, 'war'),      -- Coco vs George war
 (5, 6, 5, 'war'),      -- Luna vs Bubugaga war
 (6, 7, 8, 'war');      -- Kai vs Mira war
-
-
-    SELECT *
-FROM UserCompletion
-INNER JOIN User ON UserCompletion.user_id = User.id
-INNER JOIN WellnessChallenge ON UserCompletion.challenge_id = WellnessChallenge.id;
-
-SELECT *
-FROM User
-INNER JOIN WellnessChallenge ON User.id = WellnessChallenge.creator_id;
-
-SELECT *
-FROM User
-INNER JOIN City ON User.id = City.owner_id;
-
-SELECT *
-FROM Battle
-INNER JOIN Army AS AttackerArmy
-  ON Battle.attacker_army_id = AttackerArmy.id
-INNER JOIN City AS AttackerCity
-  ON AttackerArmy.city_id = AttackerCity.id
-INNER JOIN User AS AttackerUser
-  ON AttackerCity.owner_id = AttackerUser.id
-INNER JOIN Army AS DefenderArmy
-  ON Battle.defender_army_id = DefenderArmy.id
-INNER JOIN City AS DefenderCity
-  ON DefenderArmy.city_id = DefenderCity.id
-INNER JOIN User AS DefenderUser
-  ON DefenderCity.owner_id = DefenderUser.id
-LEFT JOIN User AS WinnerUser
-  ON Battle.winner_user_id = WinnerUser.id;
-
-SELECT *
-FROM Diplomacy
-INNER JOIN User AS Initiator ON Diplomacy.initiator_id = Initiator.id
-INNER JOIN User AS Responder ON Diplomacy.responder_id = Responder.id;
-
-SELECT *
-FROM DiplomacyRequest
-INNER JOIN User AS Sender ON DiplomacyRequest.sender_id = Sender.id
-INNER JOIN User AS Receiver ON DiplomacyRequest.receiver_id = Receiver.id;
-
   `;
 
   pool.query(SQLSTATEMENT, callback);

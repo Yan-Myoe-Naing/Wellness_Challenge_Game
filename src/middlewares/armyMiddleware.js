@@ -88,3 +88,30 @@ module.exports.changePointToSoldiers = (req, res, next) => {
 
   next();
 };
+
+
+// verify army ownership
+module.exports.verifyArmyOwnership = (req, res, next) => {
+
+  if (res.locals.userId != res.locals.city.owner_id) {
+    return res
+      .status(403)
+      .json({ message: "You are not the owner of this army" });
+  }
+
+  next();
+};
+
+module.exports.verifyArmyOwnershipForBattle = (req, res, next) => {
+
+  if (res.locals.userId != res.locals.attackerCity.owner_id) {
+    return res
+      .status(403)
+      .json({ message: "You are not the owner of this army" });
+  }
+
+  next();
+};
+
+
+

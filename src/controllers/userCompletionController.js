@@ -45,7 +45,7 @@ module.exports.readCompletionById = (req, res, next) => {
 //Get completion with user_id
 module.exports.readCompletionByUserId = (req, res, next) => {
   const data = {
-    user_id: req.params.user_id || res.locals.user.id,
+    user_id: res.locals.userId || res.locals.user.id,
   };
 
   const callback = (error, results, fields) => {

@@ -75,6 +75,7 @@ module.exports.formatDiplomacyAcceptResponse = (req, res, next) => {
 
 // Format response for battle results
 module.exports.formatBattleResponse = (req, res, next) => {
+  console.log(res.locals.battle)
   res.locals = {
     message: res.locals.message,
     status: res.locals.status,

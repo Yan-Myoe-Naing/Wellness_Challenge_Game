@@ -2,18 +2,20 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/wellnessChallengeController");
 const userController = require("../controllers/userController");
+const jwtMiddleware = require("../middlewares/jwtMiddleware")
 const { withMessage, sendResponse } = require("../middlewares/response");
 
-// 1. POST /challenges
+// POST /challenges
 router.post(
   "/",
+  jwtMiddleware.verifyToken,
   controller.createNewChallenge,
   controller.readChallengeById,
   withMessage("Challenge created successfully", 201),
   sendResponse,
 );
 
-//2. GET /challenges
+// GET /challenges
 router.get(
   "/",
   controller.readAllChallenges,
@@ -21,17 +23,11 @@ router.get(
   sendResponse,
 );
 
-//3. DELETE /challenges/{challenge_id}
-router.delete(
-  "/:challenge_id",
-  controller.deleteChallengeById,
-  withMessage("Challenge deleted", 204),
-  sendResponse,
-);
 
-// 4. PUT /challenges/{challenge_id}
+// PUT /challenges/{challenge_id}
 router.put(
   "/:challenge_id",
+  jwtMiddleware.verifyToken,
   controller.readChallengeById,
   controller.updateChallenge,
   controller.readChallengeById,
@@ -39,9 +35,10 @@ router.put(
   sendResponse,
 );
 
-// 1. POST /challenges/{challenge_id}/
+// POST /challenges/{challenge_id}/
 router.post(
   "/:challenge_id",
+  jwtMiddleware.verifyToken,
   controller.readChallengeById,
   userController.readUserById,
   controller.createNewCompletion,
@@ -51,7 +48,7 @@ router.post(
   sendResponse,
 );
 
-//2.  GET /challenges/{challenge_id}/
+//  GET /challenges/{challenge_id}/
 router.get(
   "/:challenge_id",
   controller.readCompletionByChallengeId,

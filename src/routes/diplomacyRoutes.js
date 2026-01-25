@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/diplomacyController");
 const userController = require("../controllers/userController");
+const diplomacyMiddleware = require("../middlewares/diplomacyMiddleware")
+const jwtMiddleware = require("../middlewares/jwtMiddleware")
 const {
   withMessage,
   withDynamicMessage,
@@ -27,13 +29,14 @@ router.get(
   sendResponse,
 );
 
-// GET /diplomacies/users/{user_id}
+// GET /diplomacies/users/user
 router.get(
-  "/users/:user_id",
+  "/users/user",
+  jwtMiddleware.verifyToken,
   userController.readUserById,
   controller.readDiplomacyByUserId,
   withDynamicMessage(
-    (req, res) => `Diplomacy details of user ${req.params.user_id}:`,
+    (req, res) => `Diplomacy details of user ${res.locals.userId}:`,
     200,
   ),
   sendResponse,
@@ -42,6 +45,10 @@ router.get(
 //DELETE /diplomacies/diplomacy_id
 router.delete(
   "/:diplomacy_id",
+  jwtMiddleware.verifyToken,
+  controller.readDiplomacyById,
+  diplomacyMiddleware.verifyDiplomacyRelation,
+  diplomacyMiddleware.validateForDeletion,
   controller.deleteDiplomacyById,
   withMessage("Diplomacy deleted:", 204),
   sendResponse,

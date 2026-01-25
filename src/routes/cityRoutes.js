@@ -3,10 +3,11 @@ const router = express.Router();
 const controller = require("../controllers/cityController");
 const userController = require("../controllers/userController");
 const armyController = require("../controllers/armyController");
-const pointExchange = require("../services/pointServices");
-const cityUtil = require("../utils/cityUtil");
-const armyUtil = require("../utils/armyUtil");
-const responseUtil = require("../utils/responseUtil");
+const pointExchange = require("../middlewares/pointServices");
+const cityMiddleware = require("../middlewares/cityMiddleware");
+const armyMiddleware = require("../middlewares/armyMiddleware");
+const jwtMiddleware = require("../middlewares/jwtMiddleware")
+const responseMiddleware = require("../middlewares/responseMiddleware");
 const {
   withMessage,
   withDynamicMessage,
@@ -29,32 +30,34 @@ router.get(
   sendResponse,
 );
 
-// GET /cities/users/{user_id}
+// GET /cities/users
 router.get(
-  "/users/:user_id",
+  "/users/user",
+  jwtMiddleware.verifyToken,
   userController.readUserById,
   controller.readCityByUserId,
   withDynamicMessage(
-    (req, res) => `City details of user ${req.params.user_id}:`,
+    (req, res) => `City details of user ${res.locals.userId}:`,
     200,
   ),
   sendResponse,
 );
 
-// POST /cities/users/:user_id
+// POST /cities
 router.post(
-  "/users/:user_id",
-  userController.readUserById,
+  "/",
+  jwtMiddleware.verifyToken,
+  userController.readSelf,
   pointExchange.changePointToCity,
   userController.reducePoint,
-  cityUtil.getPopulation,
+  cityMiddleware.getPopulation,
   controller.createNewCity,
-  armyUtil.getArmyMaxSize,
-  armyUtil.getArmyPower,
+  armyMiddleware.getArmyMaxSize,
+  armyMiddleware.getArmyPower,
   armyController.createNewArmy,
   controller.readCityById,
   armyController.readArmyById("army"),
-  responseUtil.formatCreateCityResponse,
+  responseMiddleware.formatCreateCityResponse,
   withDynamicMessage(
     (req, res) =>
       `City '${res.locals.city.name}' created successfully for user ${res.locals.city.owner_id}`,

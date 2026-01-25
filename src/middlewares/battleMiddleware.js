@@ -1,9 +1,9 @@
 // Store defender army ID from request body
 module.exports.storeDefenderArmyId = (req, res, next) => {
   const defenderArmyId = req.body.defender_army_id;
-  if (defenderArmyId == undefined || req.body.action == undefined) {
+  if (defenderArmyId == undefined) {
     return res.status(400).json({
-      message: "defender_army_id and action is required in request body",
+      message: "defender_army_id is required in request body",
     });
   }
 

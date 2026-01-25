@@ -3,30 +3,30 @@ const router = express.Router();
 const controller = require("../controllers/userController");
 const cityController = require("../controllers/cityController");
 const armyController = require("../controllers/armyController");
-const cityUtil = require("../utils/cityUtil");
-const armyUtil = require("../utils/armyUtil");
+const cityMiddleware = require("../middlewares/cityMiddleware");
+const armyMiddleware = require("../middlewares/armyMiddleware");
 const bcryptMiddleware = require("../middlewares/bcryptMiddleware")
 const jwtMiddleware = require("../middlewares/jwtMiddleware")
 const { withMessage, sendResponse } = require("../middlewares/response");
 
-// POST /register
 
-// 1. POST /users
+//  POST /users
 router.post(
   "/",
   controller.checkUsernameUnique,
+  bcryptMiddleware.hashPassword,
   controller.createNewUser,
-  cityUtil.getPopulation,
+  cityMiddleware.getPopulation,
   cityController.createNewCity,
-  armyUtil.getArmyMaxSize,
-  armyUtil.getArmyPower,
+  armyMiddleware.getArmyMaxSize,
+  armyMiddleware.getArmyPower,
   armyController.createNewArmy,
   controller.readUserById,
   withMessage("Player created successfully", 201),
   sendResponse,
 );
 
-//2. GET /users
+// GET /users
 router.get(
   "/",
   controller.readAllUser,
@@ -34,7 +34,7 @@ router.get(
   sendResponse,
 );
 
-//3. GET /users/{user_id}
+// GET /users/user_id
 router.get(
   "/:user_id",
   controller.readUserById,
@@ -42,9 +42,10 @@ router.get(
   sendResponse,
 );
 
-// 4. PUT /users/{user_id}
+//  PUT /users/{user_id}
 router.put(
-  "/:user_id",
+  "/",
+  jwtMiddleware.verifyToken,
   controller.checkUsernameUnique,
   controller.updateUser,
   controller.readUserById,

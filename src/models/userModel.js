@@ -3,7 +3,7 @@ const pool = require("../services/db");
 // Get all users
 module.exports.selectAll = (callback) => {
   const SQLSTATMENT = `
-    SELECT * FROM User;
+    SELECT id,username FROM User;
     `;
   pool.query(SQLSTATMENT, callback);
 };
@@ -11,7 +11,7 @@ module.exports.selectAll = (callback) => {
 // Insert a new user (only username provided)
 module.exports.insertSingle = (data, callback) => {
   const SQLSTATEMENT = `
-    INSERT INTO \`User\` (username, password_hash)
+    INSERT INTO User (username, password_hash)
     VALUES (?, ?);
   `;
   const VALUES = [data.username, data.password_hash];
@@ -28,6 +28,17 @@ module.exports.findByUsername = (username, callback) => {
 // Get a user by ID
 module.exports.selectById = (data, callback) => {
   const SQLSTATEMENT = `
+  SELECT id,username
+  FROM User 
+  WHERE id = ?
+  `;
+  const VALUES = [data.user_id];
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};
+
+// Get a user by ID
+module.exports.selectSelf = (data, callback) => {
+  const SQLSTATEMENT = `
   SELECT *
   FROM User 
   WHERE id = ?
@@ -36,14 +47,15 @@ module.exports.selectById = (data, callback) => {
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
+
 // Update user details (username and points) by ID
 module.exports.updateUser = (data, callback) => {
   const SQLSTATEMENT = `
   UPDATE User    
-  SET username = ?, points = ?   
+  SET username = ?  
   WHERE id = ?
   `;
-  const VALUES = [data.username, data.points, data.user_id];
+  const VALUES = [data.username, data.user_id];
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
 

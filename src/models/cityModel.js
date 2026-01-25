@@ -3,7 +3,7 @@ const pool = require("../services/db");
 // Get all cities
 module.exports.selectAll = (callback) => {
   const SQLSTATMENT = `
-    SELECT * 
+    SELECT id, owner_id, name
     FROM City;
     `;
   pool.query(SQLSTATMENT, callback);
@@ -12,7 +12,7 @@ module.exports.selectAll = (callback) => {
 // Get a city by its ID
 module.exports.selectById = (data, callback) => {
   const SQLSTATEMENT = `
-  SELECT *
+  SELECT id, owner_id, name
   FROM City
   WHERE id = ?
   `;

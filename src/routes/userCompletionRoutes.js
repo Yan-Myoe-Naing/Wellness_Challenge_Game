@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/userCompletionController");
+const jwtMiddleware = require("../middlewares/jwtMiddleware")
 const {
   withMessage,
   withDynamicMessage,
   sendResponse,
 } = require("../middlewares/response");
+const { JsonWebTokenError } = require("jsonwebtoken");
 
 // GET /completions
 router.get(
@@ -26,12 +28,13 @@ router.get(
   sendResponse,
 );
 
-// GET /userCompletions/users/{user_id}
+// GET /userCompletions/users/user
 router.get(
-  "/users/:user_id",
+  "/users/user",
+  jwtMiddleware.verifyToken,
   controller.readCompletionByUserId,
   withDynamicMessage(
-    (req, res) => `Completion details of user ${req.params.user_id}:`,
+    (req, res) => `Completion details of user ${res.locals.userId}:`,
     200,
   ),
   sendResponse,

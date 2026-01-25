@@ -50,7 +50,7 @@ module.exports.readDiplomacyRequestById = (req, res, next) => {
 // Get request with user_id
 module.exports.readDiplomacyRequestByUserId = (req, res, next) => {
   const data = {
-    user_id: res.locals.receiverId || res.locals.senderId || req.params.user_id,
+    user_id: res.locals.receiverId || res.locals.senderId,
   };
 
   const callback = (error, results) => {
@@ -78,7 +78,7 @@ module.exports.readDiplomacyRequestByUserId = (req, res, next) => {
 // Get pending requests by user_id
 module.exports.readPendingRequestByUserId = (req, res, next) => {
   const data = {
-    user_id: res.locals.receiverId || res.locals.senderId || req.params.user_id,
+    user_id: res.locals.receiverId || res.locals.senderId || res.locals.userId,
   };
 
   const callback = (error, results) => {
@@ -113,10 +113,10 @@ module.exports.readPendingRequestByUserId = (req, res, next) => {
 };
 
 // Create new request
-module.exports.createNewDiplomacyRequest = (req, res, next) => {
-  const senderId = req.params.user_id;
+module.exports.createNewDiplomacyRequest = (role) => (req, res, next) => {
+  const senderId = res.locals.userId;
   const receiverId = req.body.target_id;
-  const type = req.params.type;
+  const type = role;
 
   if (senderId == undefined || receiverId == undefined || type == undefined) {
     return res
@@ -148,14 +148,14 @@ module.exports.createNewDiplomacyRequest = (req, res, next) => {
 
 // Create new war request
 module.exports.createNewWar = (req, res, next) => {
-  if (req.params.user_id == undefined || req.body.target_id == undefined) {
+  if (res.locals.userId == undefined || req.body.target_id == undefined) {
     return res
       .status(400)
       .json({ message: "sender_id and receiver_id are required" });
   }
 
   const data = {
-    sender_id: req.params.user_id,
+    sender_id: res.locals.userId,
     receiver_id: req.body.target_id,
     type: "war",
     status: "accepted", // war is immediate
@@ -176,10 +176,10 @@ module.exports.createNewWar = (req, res, next) => {
 };
 
 // Update diplomacy request by Id
-module.exports.updateDiplomacyRequestById = (req, res, next) => {
+module.exports.updateDiplomacyRequestById = (role) => (req, res, next) => {
   const data = {
     request_id: req.params.request_id || res.locals.requestId,
-    status: req.params.status, // will be "accepted" or "rejected" from the route
+    status: role, 
   };
 
   const callback = (error, results) => {

@@ -44,9 +44,8 @@ module.exports.readCityById = (req, res, next) => {
 //Get city with user_id
 module.exports.readCityByUserId = (req, res, next) => {
   const data = {
-    user_id: req.params.user_id || res.locals.user.id,
+    user_id: res.locals.user?.id || res.locals.userId,
   };
-
   const callback = (error, results, fields) => {
     if (error) {
       console.log(error);
@@ -129,7 +128,7 @@ module.exports.readCityByArmy = (role) => (req, res, next) => {
       res.locals.defenderUserId = userId;
     } else {
       res.locals.city = city;
-      res.locals.userId = userId;
+      //res.locals.userId = userId;
     }
 
     next();
@@ -140,6 +139,9 @@ module.exports.readCityByArmy = (role) => (req, res, next) => {
 
 // Delete city by id
 module.exports.deleteCityById = (req, res, next) => {
+  if (
+      res.locals.battleResult != "attackerWins"
+    ){return next()}
   const data = {
     city_id:
       res.locals.defenderCity?.id || res.locals.cityId || req.params.city_id,
@@ -157,6 +159,9 @@ module.exports.deleteCityById = (req, res, next) => {
 
 // Update city by id
 module.exports.updateCityById = (req, res, next) => {
+  if (
+      res.locals.battleResult != "attackerWins"
+    ) {return next()}
   const data = {
     city_id:
       res.locals.defenderCity?.id || res.locals.cityId || req.params.city_id,

@@ -41,6 +41,9 @@ module.exports.comparePassword = (req, res, next) => {
 // MIDDLEWARE FUNCTION FOR HASHING PASSWORD
 //////////////////////////////////////////////////////
 module.exports.hashPassword = (req, res, next) => {
+    if (req.body.password == undefined) {
+    return res.status(400).json({ message: "Password is undefined" });
+  }
   const callback = (err, hash) => {
     if (err) {
       console.error("Error bcrypt:", err);

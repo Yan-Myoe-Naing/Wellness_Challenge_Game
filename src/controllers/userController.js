@@ -22,11 +22,10 @@ module.exports.readUserById = (req, res, next) => {
   const data = {
     user_id:
       req.params.user_id ||
-      req.body.user_id ||
+      res.locals.userId ||
       res.locals.user?.id ||
       res.locals.challenge?.creator_id,
   };
-  console.log("read user by Id");
 
   const callback = (error, results, fields) => {
     if (error) {
@@ -46,14 +45,36 @@ module.exports.readUserById = (req, res, next) => {
   model.selectById(data, callback);
 };
 
+//Get user with ID
+module.exports.readSelf = (req, res, next) => {
+  const data = {
+    user_id:
+      res.locals.userId
+      };
+
+  const callback = (error, results, fields) => {
+    if (error) {
+      res
+        .status(500)
+        .json({ message: "Internal server error in getting user by token" });
+    } else {
+        res.locals.user = results[0];
+        next();
+    }
+  };
+
+  model.selectSelf(data, callback);
+};
+
+
 //Check if user name is unique
 module.exports.checkUsernameUnique = (req, res, next) => {
   const username = req.body.username;
 
-  if (username == undefined || req.body.city_name == undefined) {
+  if (username == undefined) {
     return res
       .status(400)
-      .json({ message: "Username or cityname is undefined" });
+      .json({ message: "Username is undefined" });
   }
 
   const callback = (error, results) => {
@@ -69,6 +90,7 @@ module.exports.checkUsernameUnique = (req, res, next) => {
 
 
 module.exports.createNewUser = (req, res, next) => {
+
   const data = {
     username: req.body.username,
     password_hash: res.locals.hash   
@@ -76,6 +98,7 @@ module.exports.createNewUser = (req, res, next) => {
 
   const callback = (error, results) => {
     if (error) {
+      console.log(error)
       return res.status(500).json({ message: "Error inserting user" });
     } else {
       res.locals.userId = results.insertId;
@@ -90,14 +113,13 @@ module.exports.createNewUser = (req, res, next) => {
 
 //Update User
 module.exports.updateUser = (req, res, next) => {
-  if (req.body.username == undefined || req.body.points == undefined) {
+  if (req.body.username == undefined) {
     return res.status(400).json({ message: "Error: data is undefined" });
   }
 
   const data = {
     username: req.body.username,
-    points: req.body.points,
-    user_id: req.params.user_id,
+    user_id: res.locals.userId,
   };
 
   const callback = (error, results, fields) => {
@@ -116,7 +138,7 @@ module.exports.updateUser = (req, res, next) => {
 
 // Reduce user points after city creation
 module.exports.reducePoint = (req, res, next) => {
-  const userId = req.params.user_id;
+  const userId = res.locals.userId;
   const newPoints = res.locals.newPoints;
 
   if (newPoints === undefined) {
@@ -158,7 +180,7 @@ module.exports.readUserByArmy = (req, res, next) => {
     }
   };
 
-  model.selectById(data, callback);
+  model.selectSelf(data, callback);
 };
 
 
@@ -205,3 +227,4 @@ module.exports.login = (req, res, next) => {
   
     model.selectUserByUsername(data, callback);
 };
+

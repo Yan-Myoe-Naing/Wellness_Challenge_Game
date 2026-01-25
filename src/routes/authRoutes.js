@@ -3,8 +3,8 @@ const router = express.Router();
 const userController = require("../controllers/userController");
 const cityController = require("../controllers/cityController");
 const armyController = require("../controllers/armyController");
-const cityUtil = require("../utils/cityUtil");
-const armyUtil = require("../utils/armyUtil");
+const cityMiddleware = require("../middlewares/cityMiddleware");
+const armyMiddleware = require("../middlewares/armyMiddleware");
 const bcryptMiddleware = require("../middlewares/bcryptMiddleware")
 const jwtMiddleware = require("../middlewares/jwtMiddleware")
 const { withMessage, sendResponse } = require("../middlewares/response");
@@ -14,10 +14,10 @@ router.post(
   userController.checkUsernameUnique,   // ensure username not taken
   bcryptMiddleware.hashPassword,        // hash password before saving
   userController.createNewUser,         // insert user into DB
-  cityUtil.getPopulation,               // generate random population
+  cityMiddleware.getPopulation,               // generate random population
   cityController.createNewCity,         // create initial city
-  armyUtil.getArmyMaxSize,              // calculate max army size
-  armyUtil.getArmyPower,                // assign random army power
+  armyMiddleware.getArmyMaxSize,              // calculate max army size
+  armyMiddleware.getArmyPower,                // assign random army power
   armyController.createNewArmy,         // create initial army
   jwtMiddleware.generateToken,          // generate JWT
   jwtMiddleware.sendToken,              // send token back to client

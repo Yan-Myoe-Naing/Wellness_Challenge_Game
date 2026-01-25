@@ -49,9 +49,8 @@ module.exports.readDiplomacyByUserId = (req, res, next) => {
       res.locals.receiverId ||
       res.locals.senderId ||
       res.locals.attackerUserId ||
-      req.params.user_id,
+      res.locals.userId
   };
-  console.log("Diplomacy lookup userId:", data.user_id);
   const callback = (error, results, fields) => {
     if (error) {
       console.log(error);
@@ -61,19 +60,25 @@ module.exports.readDiplomacyByUserId = (req, res, next) => {
           message: "Internal server error in getting diplomacy by user_id",
         });
     } else {
-      if (results.length == 0) {
-        res.status(404).json({ message: "No diplomacy found for this user" });
-      } else {
         if (res.locals.senderId === data.user_id) {
           res.locals.senderDiplomacy = results;
+          if (res.locals.diplomacyForUser == undefined) {
+          res.locals.diplomacyForUser = [];
+          res.locals.diplomacyForUser =
+          res.locals.diplomacyForUser.concat(results);
+          }
+        
         } else if (res.locals.receiverId === data.user_id) {
           res.locals.receiverDiplomacy = results;
+        res.locals.diplomacyForUser =
+        res.locals.diplomacyForUser.concat(results);
+
+          
         } else {
           res.locals.diplomacy = results;
         }
-
         next();
-      }
+      
     }
   };
 
@@ -82,7 +87,7 @@ module.exports.readDiplomacyByUserId = (req, res, next) => {
 
 // Create new war record
 module.exports.createNewWar = (req, res, next) => {
-  const senderId = req.params.user_id;
+  const senderId = res.locals.userId;
   const receiverId = req.body.target_id;
 
   if (senderId == undefined || receiverId == undefined) {
@@ -113,7 +118,7 @@ module.exports.createNewWar = (req, res, next) => {
 };
 
 // Create new diplomacy record(alliance or peace)
-module.exports.createNewDiplomacy = (req, res, next) => {
+module.exports.createNewDiplomacy =  (req, res, next) => {
   const { sender_id, receiver_id, type } = res.locals.request;
 
   const data = {
@@ -159,7 +164,7 @@ module.exports.deleteDiplomacyById = (req, res, next) => {
       if (results.affectedRows === 0) {
         return res.status(404).json({ message: "Diplomacy record not found" });
       }
-      return res.status(204).send();
+      return res.status(200).json({message: "Diplomacy deleted"});
     }
     next();
   };

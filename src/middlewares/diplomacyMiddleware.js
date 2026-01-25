@@ -1,6 +1,6 @@
 // Set sender user ID from route parameter
 module.exports.setSenderAsUser = (req, res, next) => {
-  const senderId = req.params.user_id;
+  const senderId = res.locals.userId;
   if (senderId == undefined) {
     return res.status(400).json({ message: "sender_id is required" });
   }
@@ -20,7 +20,7 @@ module.exports.setReceiverAsUser = (req, res, next) => {
 
 // Ensure sender and receiver are not the same user
 module.exports.checkTwoUsers = (req, res, next) => {
-  const senderId = req.params.user_id; // comes from URL
+  const senderId = res.locals.userId; // comes from URL
   const receiverId = req.body.target_id; // comes from request body
 
   if (senderId == receiverId) {
@@ -140,18 +140,20 @@ module.exports.validateForPeace = (req, res, next) => {
 
 // Validate war request rules
 module.exports.validateForWar = (req, res, next) => {
-  const senderId = parseInt(res.locals.senderId, 10);
-  const receiverId = parseInt(res.locals.receiverId, 10);
+  console.log("sender:id"+senderId)
+  console.log(receiverId)
+  const senderId = res.locals.userId;
+  const receiverId = req.body.target_id;
   const existingRequests = res.locals.diplomacyRequestForUser || [];
+const existingDiplomacy = res.locals.diplomacyForUser || [];
 
   // Block if alliance or peace treaty already exists
-  const allianceOrPeace = existingRequests.find(
+  
+  const allianceOrPeace = existingDiplomacy.find(
     (reqItem) =>
-      ((reqItem.sender_id == senderId && reqItem.receiver_id == receiverId) ||
-        (reqItem.sender_id == receiverId && reqItem.receiver_id == senderId)) &&
-      (reqItem.type === "alliance" || reqItem.type === "peace") &&
-      reqItem.status === "accepted",
-  );
+      ((reqItem.initiator_id == senderId && reqItem.responder_id == receiverId) ||
+        (reqItem.initiator_id == receiverId && reqItem.responder_id == senderId)) &&
+      (reqItem.status === "alliance" || reqItem.status === "peace")  );
 
   if (allianceOrPeace) {
     return res
@@ -162,13 +164,11 @@ module.exports.validateForWar = (req, res, next) => {
   }
 
   // Block if war already exists
-  const war = existingRequests.find(
+  const war = existingDiplomacy.find(
     (reqItem) =>
-      ((reqItem.sender_id == senderId && reqItem.receiver_id == receiverId) ||
-        (reqItem.sender_id == receiverId && reqItem.receiver_id == senderId)) &&
-      reqItem.type === "war" &&
-      reqItem.status === "accepted",
-  );
+      ((reqItem.initiator_id == senderId && reqItem.responder_id == receiverId) ||
+        (reqItem.initiator_id == receiverId && reqItem.responder_id == senderId)) &&
+      reqItem.status === "war"  );
 
   if (war) {
     return res
@@ -211,3 +211,23 @@ module.exports.checkWarBetweenTwoUsers = (req, res, next) => {
 
   next();
 };
+
+
+// Verify diplomacy relation
+module.exports.verifyDiplomacyRelation = (req, res, next) => {
+  if ((res.locals.diplomacy?.initiator_id != res.locals.userId) && (res.locals.diplomacy?.responder_id != res.locals.userId)) {
+    return res.status(403).json({ message: "You are not related to this diplomacy" });
+  }
+  next();
+};
+
+
+// Validate for diplomacy deletion
+module.exports.validateForDeletion = (req, res, next) => {
+  if (res.locals.diplomacy?.status == "war") {
+    return res.status(403).json({ message: "You cannot end a war one sided" });
+  }
+  next();
+};
+
+

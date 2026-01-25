@@ -30,15 +30,6 @@ module.exports.selectAll = (callback) => {
   pool.query(SQLSTATMENT, callback);
 };
 
-// Delete a wellness challenge by its ID
-module.exports.deleteById = (data, callback) => {
-  const SQLSTATMENT = `
-    DELETE FROM WellnessChallenge
-    WHERE id = ?;
-    `;
-  const VALUES = [data.challenge_id];
-  pool.query(SQLSTATMENT, VALUES, callback);
-};
 
 // Update an existing wellness challenge
 module.exports.updateChallenge = (data, callback) => {
