@@ -5,6 +5,7 @@ module.exports.formatCreateCityResponse = (req, res, next) => {
     status: res.locals.status,
     city: res.locals.city,
     army: res.locals.army,
+    newPoints: res.locals.newPoints,
   };
   next();
 };
@@ -75,7 +76,6 @@ module.exports.formatDiplomacyAcceptResponse = (req, res, next) => {
 
 // Format response for battle results
 module.exports.formatBattleResponse = (req, res, next) => {
-  console.log(res.locals.battle)
   res.locals = {
     message: res.locals.message,
     status: res.locals.status,

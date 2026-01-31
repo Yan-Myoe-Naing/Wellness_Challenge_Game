@@ -66,6 +66,27 @@ module.exports.readCityByUserId = (req, res, next) => {
   model.selectByUserId(data, callback);
 };
 
+// Get cities by user id but allow empty list
+module.exports.readCityByUserIdAllowEmpty = (req, res, next) => {
+  const data = {
+    user_id: res.locals.user?.id || res.locals.userId,
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error in getting city by user_id" });
+    }
+    res.locals.cityByUser = results || [];
+    res.locals.cityCount = res.locals.cityByUser.length;
+    next();
+  };
+
+  model.selectByUserId(data, callback);
+};
+
 // Create new city for a user
 module.exports.createNewCity = (req, res, next) => {
   if (req.body.city_name == undefined) {
@@ -155,6 +176,24 @@ module.exports.deleteCityById = (req, res, next) => {
   };
 
   model.deleteById(data, callback);
+};
+
+// Get war-eligible target cities
+module.exports.readWarTargetsByUserId = (req, res, next) => {
+  const data = { user_id: res.locals.userId || res.locals.user?.id };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.log("Error readWarTargetsByUserId:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error in getting war targets" });
+    }
+    res.locals.warTargets = results || [];
+    next();
+  };
+
+  model.selectWarTargetsByUserId(data, callback);
 };
 
 // Update city by id

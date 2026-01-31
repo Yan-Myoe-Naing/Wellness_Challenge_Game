@@ -22,17 +22,9 @@ router.get(
   sendResponse,
 );
 
-// GET /cities/city_id
+// GET /cities/me
 router.get(
-  "/:city_id",
-  controller.readCityById,
-  withDynamicMessage((req, res) => `City ${req.params.city_id} details:`, 200),
-  sendResponse,
-);
-
-// GET /cities/users
-router.get(
-  "/users/user",
+  "/me",
   jwtMiddleware.verifyToken,
   userController.readUserById,
   controller.readCityByUserId,
@@ -40,6 +32,39 @@ router.get(
     (req, res) => `City details of user ${res.locals.userId}:`,
     200,
   ),
+  sendResponse,
+);
+
+// GET /cities/overview
+router.get(
+  "/overview",
+  jwtMiddleware.verifyToken,
+  userController.readUserById,
+  controller.readAllCity,
+  controller.readWarTargetsByUserId,
+  controller.readCityByUserIdAllowEmpty,
+  armyController.readArmyByCityId,
+  withMessage("City overview:", 200),
+  sendResponse,
+);
+
+// GET /cities/battleable
+router.get(
+  "/battleable",
+  jwtMiddleware.verifyToken,
+  userController.readUserById,
+  controller.readWarTargetsByUserId,
+  controller.readCityByUserIdAllowEmpty,
+  armyController.readArmyByCityId,
+  withMessage("Battleable cities:", 200),
+  sendResponse,
+);
+
+// GET /cities/city_id
+router.get(
+  "/:city_id",
+  controller.readCityById,
+  withDynamicMessage((req, res) => `City ${req.params.city_id} details:`, 200),
   sendResponse,
 );
 

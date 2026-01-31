@@ -1,0 +1,37 @@
+/* Navbar */
+nav {
+  padding: 1rem;
+}
+
+/* Headings */
+h1, h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Sections */
+section {
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+/* Buttons */
+.btn-primary {
+  border: none;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Utility classes */
+.text-light {
+  color: inherit;
+}
+
+.text-accent {
+  color: inherit;
+}

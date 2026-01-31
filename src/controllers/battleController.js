@@ -36,7 +36,6 @@ module.exports.createNewBattle = (role) =>(req, res, next) => {
 
     // store inserted battle id for downstream logic
     res.locals.battleId = results.insertId;
-    console.log("battleId: ",res.locals.battleId)
     next();
   };
 
@@ -62,7 +61,6 @@ module.exports.readBattleById = (req, res, next) => {
         res.status(404).json({ message: "Battle not found" });
       } else {
         res.locals.battle = results[0];
-        console.log(res.locals.battle)
         next();
       }
     }

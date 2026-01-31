@@ -89,3 +89,14 @@ module.exports.selectByChallengeId = (data, callback) => {
   const VALUES = [data.challenge_id];
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Get challenge overview (user, all challenges, user completions)
+module.exports.selectOverview = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT id, username, points FROM User WHERE id = ?;
+    SELECT * FROM WellnessChallenge;
+    SELECT * FROM UserCompletion WHERE user_id = ?;
+  `;
+  const VALUES = [data.user_id, data.user_id];
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};

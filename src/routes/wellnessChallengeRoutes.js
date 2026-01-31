@@ -23,6 +23,15 @@ router.get(
   sendResponse,
 );
 
+// GET /challenges/overview
+router.get(
+  "/overview",
+  jwtMiddleware.verifyToken,
+  controller.readOverviewRaw,
+  withMessage("Challenge overview:", 200),
+  sendResponse,
+);
+
 
 // PUT /challenges/{challenge_id}
 router.put(

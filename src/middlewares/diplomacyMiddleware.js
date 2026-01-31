@@ -140,8 +140,6 @@ module.exports.validateForPeace = (req, res, next) => {
 
 // Validate war request rules
 module.exports.validateForWar = (req, res, next) => {
-  console.log("sender:id"+senderId)
-  console.log(receiverId)
   const senderId = res.locals.userId;
   const receiverId = req.body.target_id;
   const existingRequests = res.locals.diplomacyRequestForUser || [];
@@ -229,5 +227,4 @@ module.exports.validateForDeletion = (req, res, next) => {
   }
   next();
 };
-
 

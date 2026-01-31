@@ -61,11 +61,15 @@ module.exports.readArmyById = (role) => (req, res, next) => {
 
 // Get armies by city IDs for a user
 module.exports.readArmyByCityId = (req, res, next) => {
-  const cities = res.locals.cityByUser; // set by cityController.readCityByUserId
+  const cities = res.locals.cityByUser || [];
+  const cityIds = cities.map((city) => city.id);
 
-  const data = {
-    cityIds: cities.map((city) => city.id),
-  };
+  if (cityIds.length === 0) {
+    res.locals.armies = [];
+    return next();
+  }
+
+  const data = { cityIds };
 
   const callback = (error, results) => {
     if (error) {
@@ -75,20 +79,14 @@ module.exports.readArmyByCityId = (req, res, next) => {
         .json({
           message: "Internal server error in getting armies by city IDs",
         });
-    } else {
-      if (results.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "No armies found for this user" });
-      } else {
-        res.locals.armies = results;
-        next();
-      }
     }
+    res.locals.armies = results || [];
+    next();
   };
 
   model.selectByCityIds(data, callback);
 };
+
 
 // Create new army for a city
 module.exports.createNewArmy = (req, res, next) => {
@@ -232,5 +230,3 @@ module.exports.deleteArmyById = (req, res, next) => {
 
   model.deleteById(data, callback);
 };
-
-

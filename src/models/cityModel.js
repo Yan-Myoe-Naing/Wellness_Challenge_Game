@@ -12,7 +12,7 @@ module.exports.selectAll = (callback) => {
 // Get a city by its ID
 module.exports.selectById = (data, callback) => {
   const SQLSTATEMENT = `
-  SELECT id, owner_id, name
+  SELECT id, owner_id, name, population
   FROM City
   WHERE id = ?
   `;
@@ -60,5 +60,22 @@ module.exports.updateOwnerById = (data, callback) => {
     WHERE id = ?
   `;
   const VALUES = [data.owner_id, data.city_id];
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};
+
+// Get war-eligible target cities (includes defender army id)
+module.exports.selectWarTargetsByUserId = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT City.id, City.name, City.owner_id, Army.id AS defender_army_id
+    FROM City
+    JOIN Army ON Army.city_id = City.id
+    JOIN Diplomacy
+      ON (
+        (Diplomacy.initiator_id = ? AND Diplomacy.responder_id = City.owner_id)
+        OR (Diplomacy.responder_id = ? AND Diplomacy.initiator_id = City.owner_id)
+      )
+    WHERE Diplomacy.status = 'war';
+  `;
+  const VALUES = [data.user_id, data.user_id];
   pool.query(SQLSTATEMENT, VALUES, callback);
 };

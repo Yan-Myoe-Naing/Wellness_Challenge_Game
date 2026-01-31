@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Pixelify+Sans:wght@400..700&family=VT323&display=swap" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+      crossorigin="anonymous"
+    />
+    <link href="css/base.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet" />
+    <link href="css/color.css" rel="stylesheet" />
+    <link href="css/cards.css" rel="stylesheet" />
+    <link href="css/modals.css" rel="stylesheet" />
+    <link href="css/toast.css" rel="stylesheet" />
+  </head>
+  <body class="profile-page">
+    <div id="navbar"></div>
+
+    <main class="py-4">
+      <div class="container mb-4">
+        <div class="profile-card glass-card text-center">
+          <img
+            id="profileIcon"
+            class="profile-icon mb-3"
+            src="https://raw.githubusercontent.com/YanMyoeNaing/website_assets/main/profileIcon.gif"
+            alt="Profile icon"
+          />
+          <h2 class="welcome-title mb-2">Your Profile</h2>
+          <div class="profile-meta">
+            <p class="mb-1">Username: <span id="profileUsername">Loading...</span></p>
+            <p class="mb-0">User ID: <span id="profileUserId">Loading...</span></p>
+            <p class="mb-0">Points: <span id="profilePoints">Loading...</span></p>
+          </div>
+          <button
+            type="button"
+            class="btn btn-primary mt-3"
+            data-bs-toggle="modal"
+            data-bs-target="#createCityModal"
+          >
+            Create City
+          </button>
+        </div>
+      </div>
+
+      <div class="container mt-3">
+        <ul class="nav nav-tabs justify-content-center profile-tabs" id="profileTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link active"
+              id="cities-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#cities-panel"
+              type="button"
+              role="tab"
+              aria-controls="cities-panel"
+              aria-selected="true"
+            >
+              Cities
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="diplomacies-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#diplomacies-panel"
+              type="button"
+              role="tab"
+              aria-controls="diplomacies-panel"
+              aria-selected="false"
+            >
+              Diplomacies
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="pending-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#pending-panel"
+              type="button"
+              role="tab"
+              aria-controls="pending-panel"
+              aria-selected="false"
+            >
+              Pending Requests
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content pt-4">
+          <div
+            class="tab-pane fade show active"
+            id="cities-panel"
+            role="tabpanel"
+            aria-labelledby="cities-tab"
+          >
+            <h2 class="mb-4 text-center">Your Cities</h2>
+            <div id="cityList" class="row"></div>
+          </div>
+          <div
+            class="tab-pane fade"
+            id="diplomacies-panel"
+            role="tabpanel"
+            aria-labelledby="diplomacies-tab"
+          >
+            <h2 class="mb-3 text-center">Diplomacies</h2>
+            <div id="diplomacyList" class="row"></div>
+          </div>
+          <div
+            class="tab-pane fade"
+            id="pending-panel"
+            role="tabpanel"
+            aria-labelledby="pending-tab"
+          >
+            <h2 class="mb-3 text-center">Pending Diplomacy Requests</h2>
+            <div id="pendingDiplomacyList" class="row"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="mt-auto py-3 text-center">
+      <p class="m-0">Conquest of Paradise — CA2 Project, For Learning Purposes</p>
+    </footer>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="actionToast"
+        class="toast align-items-center text-bg-dark border-0"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="d-flex">
+          <div class="toast-body" id="actionToastBody"></div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="createCityModal"
+      tabindex="-1"
+      aria-labelledby="createCityModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createCityModalLabel">Create City</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="cityForm">
+              <div class="form-group pb-3">
+                <label for="city_name">City name</label>
+                <input type="text" class="form-control" id="city_name" required>
+              </div>
+              <div id="warningCard" class="card border-danger mt-2 mb-0 d-none">
+                <div class="card-body text-danger">
+                  <p id="warningText" class="card-text"></p>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" form="cityForm" class="btn btn-primary">Create</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="buySoldiersModal"
+      tabindex="-1"
+      aria-labelledby="buySoldiersModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="buySoldiersModalLabel">Buy Soldiers</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="buySoldiersForm">
+              <input type="hidden" id="buyArmyId" />
+              <div class="form-group pb-3">
+                <label for="soldiersAmount">Amount of soldiers</label>
+                <input type="number" min="1" class="form-control" id="soldiersAmount" required>
+                <small class="buyable-max-text">Max buyable: <span id="buyableMaxText">0</span></small>
+              </div>
+              <div id="buySoldiersWarning" class="card border-danger mt-2 mb-0 d-none">
+                <div class="card-body text-danger">
+                  <p id="buySoldiersWarningText" class="card-text"></p>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" form="buySoldiersForm" class="btn btn-primary">Buy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/navBar.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"
+      integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS"
+      crossorigin="anonymous"
+    ></script>
+    <script src="js/toast.js" type="text/javascript"></script>
+    <script src="js/queryCmds.js" type="text/javascript"></script>
+    <script src="js/getCurrentURL.js" type="text/javascript"></script>
+    <script src="js/userNavbarToggle.js" type="text/javascript"></script>
+    <script src="js/profile.js" type="text/javascript"></script>
+  </body>
+</html>

@@ -85,6 +85,28 @@ module.exports.readDiplomacyByUserId = (req, res, next) => {
   model.selectByUserId(data, callback);
 };
 
+// Get diplomacy overview in one call (raw)
+module.exports.readOverview = (req, res, next) => {
+  const data = { user_id: res.locals.userId };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.log("Error readOverview:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error in getting diplomacy overview" });
+    }
+
+    const [allRows, userRows, pendingRows] = results;
+    res.locals.allDiplomacies = allRows || [];
+    res.locals.myDiplomacies = userRows || [];
+    res.locals.pendingRequests = pendingRows || [];
+    next();
+  };
+
+  model.selectOverview(data, callback);
+};
+
 // Create new war record
 module.exports.createNewWar = (req, res, next) => {
   const senderId = res.locals.userId;

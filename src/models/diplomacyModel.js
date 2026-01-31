@@ -31,6 +31,19 @@ module.exports.selectByUserId = (data, callback) => {
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
+// Get diplomacy overview (all, user, pending requests)
+module.exports.selectOverview = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT * FROM Diplomacy;
+    SELECT * FROM Diplomacy
+    WHERE initiator_id = ? OR responder_id = ?;
+    SELECT * FROM DiplomacyRequest
+    WHERE receiver_id = ? AND status = 'pending';
+  `;
+  const VALUES = [data.user_id, data.user_id, data.user_id];
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};
+
 // Insert a new diplomacy record
 module.exports.insertDiplomacy = (data, callback) => {
   const SQLSTATEMENT = `

@@ -34,6 +34,32 @@ router.get(
   sendResponse,
 );
 
+// GET /users/overview
+router.get(
+  "/overview",
+  controller.readOverview,
+  withMessage("Users overview:", 200),
+  sendResponse,
+);
+
+// GET /users/me
+router.get(
+  "/me",
+  jwtMiddleware.verifyToken,
+  controller.readSelf,
+  withMessage("User details:", 200),
+  sendResponse,
+);
+
+// GET /users/profile
+router.get(
+  "/profile",
+  jwtMiddleware.verifyToken,
+  controller.readProfile,
+  withMessage("User profile data:", 200),
+  sendResponse,
+);
+
 // GET /users/user_id
 router.get(
   "/:user_id",

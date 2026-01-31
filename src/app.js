@@ -17,11 +17,12 @@ app.use(express.urlencoded({ extended: false }));
 //////////////////////////////////////////////////////
 // SETUP ROUTES
 //////////////////////////////////////////////////////
-const mainRoutes = require("./routes/mainRoutes");
-app.use("/", mainRoutes);
+const mainRoutes = require('./routes/mainRoutes');
+app.use("/api", mainRoutes);
+app.use("/",express.static('public'))
 
-app.get("/", (req, res) => {
-  res.send("I am Alive!");
+app.get('/', (req, res) => {
+  res.send('I am Alive!')
 });
 
 //////////////////////////////////////////////////////

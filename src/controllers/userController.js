@@ -66,6 +66,60 @@ module.exports.readSelf = (req, res, next) => {
   model.selectSelf(data, callback);
 };
 
+// Get users overview (raw data)
+module.exports.readOverview = (req, res, next) => {
+  const callback = (error, results) => {
+    if (error) {
+      console.log("Error readOverview:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error in getting users overview" });
+    }
+
+    const [userRows, diplomacyRows] = results;
+    res.locals.users = userRows || [];
+    res.locals.diplomacies = diplomacyRows || [];
+    next();
+  };
+
+  model.selectOverview(callback);
+};
+
+
+// Get full profile data in one call
+module.exports.readProfile = (req, res, next) => {
+  const data = { user_id: res.locals.userId };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.log("Error readProfile:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error in getting profile data" });
+    }
+
+    const [
+      userRows,
+      cityRows,
+      armyRows,
+      diplomacyRows,
+      pendingRequestRows,
+    ] = results;
+
+    res.locals.profile = {
+      user: userRows?.[0] || null,
+      cities: cityRows || [],
+      armies: armyRows || [],
+      diplomacies: diplomacyRows || [],
+      pendingRequests: pendingRequestRows || [],
+    };
+
+    next();
+  };
+
+  model.selectProfile(data, callback);
+};
+
 
 //Check if user name is unique
 module.exports.checkUsernameUnique = (req, res, next) => {
@@ -227,4 +281,3 @@ module.exports.login = (req, res, next) => {
   
     model.selectUserByUsername(data, callback);
 };
-

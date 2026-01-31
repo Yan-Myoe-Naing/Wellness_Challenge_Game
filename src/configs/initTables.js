@@ -90,7 +90,7 @@ bcrypt.hash("1234", saltRounds, (err, hash) => {
   );
 
   INSERT INTO User (id, username, password_hash, points) VALUES
-  (1, 'Reily', '${hash}', 100),
+  (1, 'Reily', '${hash}', 300),
   (2, 'Zune', '${hash}', 50),
   (3, 'George', '${hash}', 110),
   (4, 'Coco', '${hash}', 0),
@@ -100,12 +100,12 @@ bcrypt.hash("1234", saltRounds, (err, hash) => {
   (8, 'Mira', '${hash}', 8);
 
   INSERT INTO WellnessChallenge (id, creator_id, description, points) VALUES
-  (1, 1, 'Fixing sleep schedule', 10),
-  (2, 2, 'Eating Healthy', 10),
-  (3, 2, 'Push ups', 5),
-  (4, 2, 'Daily Meditation', 5),
+  (1, 1, 'Fixing sleep schedule', 20),
+  (2, 2, 'Eating Healthy', 20),
+  (3, 2, 'Push ups', 15),
+  (4, 2, 'Daily Meditation', 20),
   (5, 3, 'Drink 2L of water', 15),
-  (6, 1, 'Walk 10,000 steps', 15);
+  (6, 1, 'Walk 10,000 steps', 25);
 
   INSERT INTO UserCompletion (id, challenge_id, user_id, details) VALUES
   (1, 1, 2, 'Slept before 11pm for 5 days'),
@@ -150,7 +150,9 @@ INSERT INTO DiplomacyRequest (id, sender_id, receiver_id, type, status, responde
 (7, 1, 2, 'war', 'accepted', NULL),
 (8, 4, 3, 'war', 'accepted', NULL),  
 (9, 6, 5, 'war', 'accepted', NULL),
-(10, 7, 8, 'war', 'accepted', NULL);
+(10, 7, 8, 'war', 'accepted', NULL),
+(11, 2, 1, 'peace', 'pending', NULL),
+(12, 3, 1, 'alliance', 'pending', NULL);
 
 INSERT INTO Diplomacy (id, initiator_id, responder_id, status) VALUES
 (1, 2, 5, 'alliance'), -- Zune + Bubugaga alliance

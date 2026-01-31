@@ -1,0 +1,42 @@
+.modal-content {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.modal-header,
+.modal-footer {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-title {
+  font-family: "Jersey 10", "Pixelify Sans", "VT323", sans-serif;
+  letter-spacing: 0.06em;
+}
+
+.modal-body .form-control {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--ink);
+}
+
+.modal-body .buyable-max-text {
+  color: #ffe6a6 !important;
+}
+
+.modal-body .form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.2rem rgba(255, 211, 106, 0.25);
+}
+
+.btn-close {
+  filter: brightness(0.9);
+}
+
+.modal-dialog {
+  max-width: 420px;
+}

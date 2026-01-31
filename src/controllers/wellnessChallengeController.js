@@ -162,7 +162,7 @@ module.exports.readCompletionById = (req, res, next) => {
 //Add point to related users
 module.exports.addPointsToUser = (req, res, next) => {
   const data = {
-    userId: res.locals.user.id || res.locals.userId,
+    user_id: res.locals.user.id || res.locals.userId,
     points: res.locals.challenge.points,
   };
 
@@ -202,4 +202,26 @@ module.exports.readCompletionByChallengeId = (req, res, next) => {
   };
 
   model.selectByChallengeId(data, callback);
+};
+
+// Get challenge overview in one call (raw)
+module.exports.readOverviewRaw = (req, res, next) => {
+  const data = { user_id: res.locals.userId };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.log("Error readOverviewRaw:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error in getting challenge overview" });
+    }
+
+    const [userRows, challengeRows, completionRows] = results;
+    res.locals.user = userRows?.[0] || null;
+    res.locals.challenges = challengeRows || [];
+    res.locals.completions = completionRows || [];
+    next();
+  };
+
+  model.selectOverview(data, callback);
 };

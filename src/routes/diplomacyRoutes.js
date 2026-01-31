@@ -18,6 +18,15 @@ router.get(
   sendResponse,
 );
 
+// GET /diplomacies/overview
+router.get(
+  "/overview",
+  jwtMiddleware.verifyToken,
+  controller.readOverview,
+  withMessage("Diplomacy overview:", 200),
+  sendResponse,
+);
+
 // GET /diplomacies/diplomacy_id
 router.get(
   "/:diplomacy_id",

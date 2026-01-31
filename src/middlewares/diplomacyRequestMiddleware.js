@@ -206,7 +206,6 @@ module.exports.checkWarBetweenTwoUsers = (req, res, next) => {
 
   // Store war record ID if found, else null
   res.locals.warId = warRecord ? warRecord.id : null;
-  console.log(res.locals.warId)
   next();
 };
 
