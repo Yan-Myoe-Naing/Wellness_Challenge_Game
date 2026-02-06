@@ -5,88 +5,154 @@ let userPoints = null;
 let completedChallenges = null;
 
 document.addEventListener("DOMContentLoaded", function () {
-  token = localStorage.getItem("token");
-  if (!token) {
-    window.location.href = "login.html";
-    return;
-  }
+  token = ensureTokenOrRedirect("login.html");
+  if (!token) return;
 
-  if (typeof window.currentUrl === "undefined") {
-    window.currentUrl = window.location.origin;
-  }
-  if (window.currentUrl === "null") {
-    alert("Open this page via http://localhost:3000 (not file://).");
-    return;
-  }
+  if (!ensureBaseUrlOrWarn()) return;
 
+  buildChallengeModal();
   eventListeners();
   loadPageData();
 });
 
+
+
+// buildChallengeModal.
+function buildChallengeModal() {
+  if (typeof buildModal !== "function") return;
+  buildModal({
+    id: "completeChallengeModal",
+    title: "Complete Challenge",
+    bodyHtml: `
+      <form id="completeChallengeForm">
+        <input type="hidden" id="completeChallengeId" />
+        <div class="form-group">
+          <label for="challengeDetails">Details</label>
+          <textarea class="form-control" id="challengeDetails" rows="3" required></textarea>
+        </div>
+      </form>
+    `,
+    footerHtml: `
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" form="completeChallengeForm" class="btn btn-primary">Submit</button>
+    `,
+  });
+}
+
+
+
+// eventListeners.
 function eventListeners() {
   document.getElementById("activeChallengeList")?.addEventListener("click", function (event) {
-    const button = event.target?.closest(".complete-challenge-btn");
-    if (!button) return;
-    const challengeId = button.getAttribute("data-id");
-    openCompletionModal(challengeId);
+    handleActiveChallengeClick(event);
+  });
+
+  document.getElementById("completedChallengeList")?.addEventListener("click", function (event) {
+    handleCompletedChallengeClick(event);
   });
 
   document.getElementById("completeChallengeForm")?.addEventListener("submit", function (event) {
-    event.preventDefault();
-    const challengeId = document.getElementById("completeChallengeId")?.value;
-    const details = document.getElementById("challengeDetails")?.value || "";
-    if (!challengeId || details.trim() === "") return;
-    completeChallenge(challengeId, details.trim());
+    handleCompleteChallengeSubmit(event);
   });
 
   document.getElementById("createChallengeForm")?.addEventListener("submit", function (event) {
-    event.preventDefault();
-    const description = document.getElementById("challengeDescription")?.value?.trim();
-    const pointsValue = Number(document.getElementById("challengePoints")?.value);
-    if (!description || !pointsValue || pointsValue <= 0) return;
-    createChallenge(description, pointsValue);
+    handleCreateChallengeSubmit(event);
   });
 }
 
+
+
+// handleActiveChallengeClick.
+function handleActiveChallengeClick(event) {
+  const button = event.target?.closest(".complete-challenge-btn");
+  if (!button) return;
+  const challengeId = button.getAttribute("data-id");
+  openCompletionModal(challengeId);
+}
+
+
+
+// handleCompletedChallengeClick.
+function handleCompletedChallengeClick(event) {
+  const button = event.target?.closest(".delete-completion-btn");
+  if (!button) return;
+  const completionId = button.getAttribute("data-id");
+  deleteCompletion(completionId);
+}
+
+
+
+// handleCompleteChallengeSubmit.
+function handleCompleteChallengeSubmit(event) {
+  event.preventDefault();
+  const challengeId = document.getElementById("completeChallengeId")?.value;
+  const details = document.getElementById("challengeDetails")?.value || "";
+  if (!challengeId || details.trim() === "") return;
+  completeChallenge(challengeId, details.trim());
+}
+
+
+
+// handleCreateChallengeSubmit.
+function handleCreateChallengeSubmit(event) {
+  event.preventDefault();
+  const description = document.getElementById("challengeDescription")?.value?.trim();
+  const pointsValue = Number(document.getElementById("challengePoints")?.value);
+  if (!description || !pointsValue || pointsValue <= 0) return;
+  createChallenge(description, pointsValue);
+}
+
+
+
+// loadPageData.
 function loadPageData() {
-  fetchMethod(currentUrl + "/api/challenges/overview", onOverviewLoaded, "GET", null, token);
-}
 
-function onOverviewLoaded(status, data) {
-  if (status !== 200) {
-    allChallenges = [];
-    completedChallenges = [];
-    completions = [];
-    userPoints = 0;
-    tryRender();
-    return;
-  }
 
-  allChallenges = data?.data?.challenges || [];
-  completions = data?.data?.completions || [];
-  userPoints = data?.data?.user?.points ?? 0;
-  completedChallenges = [];
-  allChallenges = allChallenges.filter((c) => {
-    for (const comp of completions) {
-      if (comp.challenge_id === c.id) {
-        completedChallenges.push(c);
-        return false;
-      }
+// callback.
+  const callback = (status, data) => {
+    if (status !== 200) {
+      allChallenges = [];
+      completedChallenges = [];
+      completions = [];
+      userPoints = 0;
+      tryRender();
+      return;
     }
-    return true;
-  });
-  tryRender();
+
+    allChallenges = data?.data?.challenges || [];
+    completions = data?.data?.completions || [];
+    userPoints = data?.data?.user?.points ?? 0;
+    completedChallenges = [];
+    allChallenges = allChallenges.filter((c) => {
+      for (const comp of completions) {
+        if (comp.challenge_id === c.id) {
+          completedChallenges.push(c);
+          return false;
+        }
+      }
+      return true;
+    });
+    tryRender();
+  };
+
+  fetchMethod(currentUrl + "/api/challenges/overview", callback, "GET", null, token);
 }
 
+
+
+// tryRender.
 function tryRender() {
   if (!allChallenges || !completedChallenges || !completions || userPoints === null) return;
 
-  renderStats(userPoints, allChallenges.length, completedChallenges.length);
-  renderChallenges(allChallenges);
-  renderProgress(completedChallenges);
+  showStats(userPoints, allChallenges.length, completedChallenges.length);
+  showChallenges(allChallenges);
+  showProgress(completedChallenges);
 }
 
-function renderStats(points, activeCount, completedCount) {
+
+
+// showStats.
+function showStats(points, activeCount, completedCount) {
   const values = document.querySelectorAll(".challenge-stats .stat-value");
   if (values.length >= 3) {
     values[0].textContent = points;
@@ -95,7 +161,10 @@ function renderStats(points, activeCount, completedCount) {
   }
 }
 
-function renderChallenges(challenges) {
+
+
+// showChallenges.
+function showChallenges(challenges) {
   const listEl = document.getElementById("activeChallengeList");
   if (!listEl) return;
   listEl.innerHTML = "";
@@ -123,7 +192,10 @@ function renderChallenges(challenges) {
   });
 }
 
-function renderProgress(challenges) {
+
+
+// showProgress.
+function showProgress(challenges) {
   const listEl = document.getElementById("completedChallengeList");
   if (!listEl) return;
   listEl.innerHTML = "";
@@ -133,6 +205,9 @@ function renderProgress(challenges) {
     return;
   }
 
+
+
+// completionMap.
   const completionMap = completions.reduce((map, c) => {
     map[c.challenge_id] = c;
     return map;
@@ -141,6 +216,7 @@ function renderProgress(challenges) {
   challenges.forEach((challenge) => {
     const completion = completionMap[challenge.id];
     const details = completion?.details || "Completed";
+    const completionId = completion?.id;
     const card = document.createElement("div");
     card.className = "col-xl-4 col-lg-6 col-md-12 p-3";
     card.innerHTML = `
@@ -149,6 +225,13 @@ function renderProgress(challenges) {
           <h5 class="card-title">${challenge.description}</h5>
           <p class="card-text mb-1">Points: ${challenge.points}</p>
           <p class="card-text mb-0">Notes: ${details}</p>
+          ${
+            completionId
+              ? `<button class="btn btn-outline-warning btn-sm mt-3 delete-completion-btn" data-id="${completionId}">
+                  Undo
+                </button>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -157,8 +240,14 @@ function renderProgress(challenges) {
 }
 
 
+
+
+// createChallenge.
 function createChallenge(description, points) {
   const data = { description, points };
+
+
+// callback.
   const callback = (status, response) => {
     if (status === 201) {
       const challenge = response?.data?.challenge || {
@@ -188,6 +277,9 @@ function createChallenge(description, points) {
   fetchMethod(currentUrl + "/api/challenges", callback, "POST", data, token);
 }
 
+
+
+// openCompletionModal.
 function openCompletionModal(challengeId) {
   const idInput = document.getElementById("completeChallengeId");
   const detailsInput = document.getElementById("challengeDetails");
@@ -200,9 +292,15 @@ function openCompletionModal(challengeId) {
   if (typeof showModal === "function") showModal("completeChallengeModal");
 }
 
+
+
+// completeChallenge.
 function completeChallenge(challengeId, details) {
   if (!challengeId || !details) return;
   const data = { details };
+
+
+// callback.
   const callback = (status, response) => {
     if (status === 201) {
       const completion = response?.data?.completion || {
@@ -211,6 +309,9 @@ function completeChallenge(challengeId, details) {
       };
       completions.push(completion);
 
+
+
+// challengeIndex.
       const challengeIndex = allChallenges.findIndex((c) => String(c.id) === String(challengeId));
       if (challengeIndex >= 0) {
         const challenge = allChallenges[challengeIndex];
@@ -234,4 +335,52 @@ function completeChallenge(challengeId, details) {
   };
 
   fetchMethod(currentUrl + "/api/challenges/" + challengeId, callback, "POST", data, token);
+}
+
+
+
+// deleteCompletion.
+function deleteCompletion(completionId) {
+  if (!completionId) return;
+
+
+// callback.
+  const callback = (status, response) => {
+    if (status === 200) {
+
+
+// removed.
+      const removed = completions.find((c) => String(c.id) === String(completionId));
+      if (removed) {
+
+
+// idx.
+        const idx = completions.findIndex((c) => String(c.id) === String(completionId));
+        if (idx >= 0) completions.splice(idx, 1);
+
+        const challengeIdx = completedChallenges.findIndex(
+          (c) => String(c.id) === String(removed.challenge_id)
+        );
+        if (challengeIdx >= 0) {
+          const challenge = completedChallenges[challengeIdx];
+          completedChallenges.splice(challengeIdx, 1);
+          allChallenges.push(challenge);
+          userPoints = Math.max(0, userPoints - (Number(challenge.points) || 0));
+        }
+      }
+
+      tryRender();
+      if (typeof showToast === "function") {
+        showToast("Completion deleted.", true);
+      }
+    } else {
+      if (typeof showToast === "function") {
+        showToast(response?.message || "Failed to delete completion.", false);
+      } else {
+        alert(response?.message || "Failed to delete completion.");
+      }
+    }
+  };
+
+  fetchMethod(currentUrl + "/api/userCompletions/" + completionId, callback, "DELETE", null, token);
 }

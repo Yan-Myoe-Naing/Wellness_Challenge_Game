@@ -1,37 +1,36 @@
 let usersCache = [];
+let diplomacyCache = [];
 
 document.addEventListener("DOMContentLoaded", function () {
-  if (typeof window.currentUrl === "undefined") {
-    window.currentUrl = window.location.origin;
-  }
-  if (window.currentUrl === "null") {
-    alert("Open this page via http://localhost:3000 (not file://).");
-    return;
-  }
-
-  eventListeners();
+  if (!ensureBaseUrlOrWarn()) return;
   loadPageData();
 });
 
-function eventListeners() {}
 
+
+// loadPageData.
 function loadPageData() {
-  fetchMethod(currentUrl + "/api/users/overview", onOverviewLoaded, "GET", null, null);
+
+
+// callback.
+  const callback = (status, data) => {
+    if (status !== 200) {
+      alert(data?.message || "Failed to load players.");
+      return;
+    }
+
+    usersCache = data?.data?.users || [];
+    diplomacyCache = data?.data?.diplomacies || [];
+    showUsers();
+  };
+
+  fetchMethod(currentUrl + "/api/users/overview", callback, "GET", null, null);
 }
 
-function onOverviewLoaded(status, data) {
-  if (status !== 200) {
-    alert(data?.message || "Failed to load players.");
-    return;
-  }
-
-  usersCache = data?.data?.users || [];
-  diplomacyCache = data?.data?.diplomacies || [];
-  renderUsers();
-}
 
 
-function renderUsers() {
+// showUsers.
+function showUsers() {
   const users = usersCache;
   const listEl = document.getElementById("userList");
   if (!listEl) return;
@@ -53,7 +52,6 @@ function renderUsers() {
         <div class="card-body">
           <h5 class="card-title">${user.username || "Unknown"}</h5>
           <p class="card-text mb-1">User ID: ${user.id}</p>
-          <p class="card-text mb-2">Points: ${user.points ?? 0}</p>
           <div class="d-flex flex-wrap gap-2">
             <span class="rel-badge rel-war">War (${counts.war})</span>
             <span class="rel-badge rel-alliance">Alliance (${counts.alliance})</span>
@@ -66,6 +64,9 @@ function renderUsers() {
   });
 }
 
+
+
+// buildRelationCounts.
 function buildRelationCounts(diplomacies) {
   const counts = {};
   diplomacies.forEach((dip) => {

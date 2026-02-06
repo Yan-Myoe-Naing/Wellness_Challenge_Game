@@ -1,13 +1,12 @@
 const model = require("../models/CityModel.js");
 
-// Get all city
+
+// Read all city.
 module.exports.readAllCity = (req, res, next) => {
   const callback = (error, results, fields) => {
     if (error) {
       console.log("Error readAllCity:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting all cities" });
+      return res.status(500).json({ message: "Internal server error in getting all cities" });
     } else {
       res.locals.allCity = results;
       next();
@@ -17,7 +16,8 @@ module.exports.readAllCity = (req, res, next) => {
   model.selectAll(callback);
 };
 
-//Get city with ID
+
+// Read city by id.
 module.exports.readCityById = (req, res, next) => {
   const data = {
     city_id: req.params.city_id || res.locals.cityId,
@@ -41,7 +41,8 @@ module.exports.readCityById = (req, res, next) => {
   model.selectById(data, callback);
 };
 
-//Get city with user_id
+
+// Read city by user id.
 module.exports.readCityByUserId = (req, res, next) => {
   const data = {
     user_id: res.locals.user?.id || res.locals.userId,
@@ -66,7 +67,8 @@ module.exports.readCityByUserId = (req, res, next) => {
   model.selectByUserId(data, callback);
 };
 
-// Get cities by user id but allow empty list
+
+// Read city by user id allow empty.
 module.exports.readCityByUserIdAllowEmpty = (req, res, next) => {
   const data = {
     user_id: res.locals.user?.id || res.locals.userId,
@@ -75,9 +77,7 @@ module.exports.readCityByUserIdAllowEmpty = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.log(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting city by user_id" });
+      return res.status(500).json({ message: "Internal server error in getting city by user_id" });
     }
     res.locals.cityByUser = results || [];
     res.locals.cityCount = res.locals.cityByUser.length;
@@ -87,7 +87,8 @@ module.exports.readCityByUserIdAllowEmpty = (req, res, next) => {
   model.selectByUserId(data, callback);
 };
 
-// Create new city for a user
+
+// Create new city.
 module.exports.createNewCity = (req, res, next) => {
   if (req.body.city_name == undefined) {
     return res.status(400).json({ message: "City name is required" });
@@ -102,9 +103,7 @@ module.exports.createNewCity = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.log(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in creating city" });
+      return res.status(500).json({ message: "Internal server error in creating city" });
     }
     res.locals.cityId = results.insertId;
     next();
@@ -113,16 +112,16 @@ module.exports.createNewCity = (req, res, next) => {
   model.insertCity(data, callback);
 };
 
-// Get city by army id
+
+// Read city by army.
 module.exports.readCityByArmy = (role) => (req, res, next) => {
-  // choose army based on role or fallback
   let army;
   if (role === "attacker") {
     army = res.locals.attackerArmy;
   } else if (role === "defender") {
     army = res.locals.defenderArmy;
   } else {
-    army = res.locals.army; // generic fallback
+    army = res.locals.army;
   }
 
   const data = { city_id: army.city_id };
@@ -130,9 +129,7 @@ module.exports.readCityByArmy = (role) => (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.log(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting city by army" });
+      return res.status(500).json({ message: "Internal server error in getting city by army" });
     }
     if (results.length === 0) {
       return res.status(404).json({ message: "City not found" });
@@ -149,7 +146,6 @@ module.exports.readCityByArmy = (role) => (req, res, next) => {
       res.locals.defenderUserId = userId;
     } else {
       res.locals.city = city;
-      //res.locals.userId = userId;
     }
 
     next();
@@ -158,7 +154,8 @@ module.exports.readCityByArmy = (role) => (req, res, next) => {
   model.selectById(data, callback);
 };
 
-// Delete city by id
+
+// Delete city by id.
 module.exports.deleteCityById = (req, res, next) => {
   if (
       res.locals.battleResult != "attackerWins"
@@ -178,16 +175,15 @@ module.exports.deleteCityById = (req, res, next) => {
   model.deleteById(data, callback);
 };
 
-// Get war-eligible target cities
+
+// Read war targets by user id.
 module.exports.readWarTargetsByUserId = (req, res, next) => {
   const data = { user_id: res.locals.userId || res.locals.user?.id };
 
   const callback = (error, results) => {
     if (error) {
       console.log("Error readWarTargetsByUserId:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting war targets" });
+      return res.status(500).json({ message: "Internal server error in getting war targets" });
     }
     res.locals.warTargets = results || [];
     next();
@@ -196,7 +192,8 @@ module.exports.readWarTargetsByUserId = (req, res, next) => {
   model.selectWarTargetsByUserId(data, callback);
 };
 
-// Update city by id
+
+// Update city by id.
 module.exports.updateCityById = (req, res, next) => {
   if (
       res.locals.battleResult != "attackerWins"
@@ -204,15 +201,13 @@ module.exports.updateCityById = (req, res, next) => {
   const data = {
     city_id:
       res.locals.defenderCity?.id || res.locals.cityId || req.params.city_id,
-    owner_id: res.locals.attackerUserId, // attacker becomes new owner
+    owner_id: res.locals.attackerUserId,
   };
 
   const callback = (error, results) => {
     if (error) {
       console.log(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in updating city owner" });
+      return res.status(500).json({ message: "Internal server error in updating city owner" });
     }
     if (results.affectedRows === 0) {
       return res.status(404).json({ message: "City not found" });
@@ -225,3 +220,8 @@ module.exports.updateCityById = (req, res, next) => {
 
   model.updateOwnerById(data, callback);
 };
+
+
+
+
+

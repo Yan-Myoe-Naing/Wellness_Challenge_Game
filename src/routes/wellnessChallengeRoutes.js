@@ -5,6 +5,7 @@ const userController = require("../controllers/userController");
 const jwtMiddleware = require("../middlewares/jwtMiddleware")
 const { withMessage, sendResponse } = require("../middlewares/response");
 
+
 // POST /challenges
 router.post(
   "/",
@@ -15,13 +16,6 @@ router.post(
   sendResponse,
 );
 
-// GET /challenges
-router.get(
-  "/",
-  controller.readAllChallenges,
-  withMessage("All challenges details:", 200),
-  sendResponse,
-);
 
 // GET /challenges/overview
 router.get(
@@ -33,18 +27,7 @@ router.get(
 );
 
 
-// PUT /challenges/{challenge_id}
-router.put(
-  "/:challenge_id",
-  jwtMiddleware.verifyToken,
-  controller.readChallengeById,
-  controller.updateChallenge,
-  controller.readChallengeById,
-  withMessage("Challenge updated successfully", 200),
-  sendResponse,
-);
-
-// POST /challenges/{challenge_id}/
+// POST /challenges/:challenge_id
 router.post(
   "/:challenge_id",
   jwtMiddleware.verifyToken,
@@ -57,12 +40,5 @@ router.post(
   sendResponse,
 );
 
-//  GET /challenges/{challenge_id}/
-router.get(
-  "/:challenge_id",
-  controller.readCompletionByChallengeId,
-  withMessage("All challenges details by challenge_id:", 200),
-  sendResponse,
-);
-
 module.exports = router;
+

@@ -1,13 +1,12 @@
 const model = require("../models/battleModel");
 
-// Get all battles
+
+// Read all battle.
 module.exports.readAllBattle = (req, res, next) => {
   const callback = (error, results, fields) => {
     if (error) {
       console.error("Error readAllBattle:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting all battles" });
+      return res.status(500).json({ message: "Internal server error in getting all battles" });
     } else {
       res.locals.allBattles = results;
       next();
@@ -17,7 +16,8 @@ module.exports.readAllBattle = (req, res, next) => {
   model.selectAll(callback);
 };
 
-// Create new battle record
+
+// Create new battle.
 module.exports.createNewBattle = (role) =>(req, res, next) => {
   const data = {
     attacker_army_id: res.locals.attackerArmy?.id,
@@ -29,12 +29,8 @@ module.exports.createNewBattle = (role) =>(req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in creating new battle" });
+      return res.status(500).json({ message: "Internal server error in creating new battle" });
     }
-
-    // store inserted battle id for downstream logic
     res.locals.battleId = results.insertId;
     next();
   };
@@ -43,7 +39,7 @@ module.exports.createNewBattle = (role) =>(req, res, next) => {
 };
 
 
-// Get battle with ID
+// Read battle by id.
 module.exports.readBattleById = (req, res, next) => {
   const data = {
     battle_id: req.params.battle_id || res.locals.battleId,
@@ -68,4 +64,9 @@ module.exports.readBattleById = (req, res, next) => {
 
   model.selectById(data, callback);
 };
+
+
+
+
+
 

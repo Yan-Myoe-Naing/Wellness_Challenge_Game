@@ -1,13 +1,12 @@
 const model = require("../models/armyModel.js");
 
-// Get all army
+
+// Read all army.
 module.exports.readAllArmy = (req, res, next) => {
   const callback = (error, results, fields) => {
     if (error) {
       console.error("Error readAllArmy:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting all armies" });
+      return res.status(500).json({ message: "Internal server error in getting all armies" });
     } else {
       res.locals.allArmy = results;
       next();
@@ -17,7 +16,8 @@ module.exports.readAllArmy = (req, res, next) => {
   model.selectAll(callback);
 };
 
-//Get army with ID
+
+// Read army by id.
 module.exports.readArmyById = (role) => (req, res, next) => {
   let armyId;
   if (role === "attacker") {
@@ -35,9 +35,7 @@ module.exports.readArmyById = (role) => (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting army by ID" });
+      return res.status(500).json({ message: "Internal server error in getting army by ID" });
     }
     if (results.length === 0) {
       return res.status(404).json({ message: "Army not found" });
@@ -59,7 +57,8 @@ module.exports.readArmyById = (role) => (req, res, next) => {
   model.selectById(data, callback);
 };
 
-// Get armies by city IDs for a user
+
+// Read army by city id.
 module.exports.readArmyByCityId = (req, res, next) => {
   const cities = res.locals.cityByUser || [];
   const cityIds = cities.map((city) => city.id);
@@ -74,9 +73,7 @@ module.exports.readArmyByCityId = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.error(error);
-      return res
-        .status(500)
-        .json({
+      return res.status(500).json({
           message: "Internal server error in getting armies by city IDs",
         });
     }
@@ -88,7 +85,7 @@ module.exports.readArmyByCityId = (req, res, next) => {
 };
 
 
-// Create new army for a city
+// Create new army.
 module.exports.createNewArmy = (req, res, next) => {
   const data = {
     city_id: res.locals.cityId,
@@ -99,9 +96,7 @@ module.exports.createNewArmy = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in creating army" });
+      return res.status(500).json({ message: "Internal server error in creating army" });
     }
 
     res.locals.armyId = results.insertId;
@@ -111,15 +106,14 @@ module.exports.createNewArmy = (req, res, next) => {
   model.insertArmy(data, callback);
 };
 
-// Update army soldiers by ID
+
+// Update army by id.
 module.exports.updateArmyById = (req, res, next) => {
   const armyId = req.params.id || res.locals.army.id;
   const soldiers = res.locals.army.soldiers;
 
   if (armyId == undefined || soldiers == undefined) {
-    return res
-      .status(400)
-      .json({ message: "Missing army ID or soldiers amount" });
+    return res.status(400).json({ message: "Missing army ID or soldiers amount" });
   }
 
   const data = { id: armyId, soldiers };
@@ -127,9 +121,7 @@ module.exports.updateArmyById = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in updating army soldiers" });
+      return res.status(500).json({ message: "Internal server error in updating army soldiers" });
     }
 
     res.locals.army.soldiers = soldiers;
@@ -140,7 +132,8 @@ module.exports.updateArmyById = (req, res, next) => {
   model.updateSoldiersById(data, callback);
 };
 
-// Update army power for battle
+
+// Update army power.
 module.exports.updateArmyPower = (req, res, next) => {
   if (res.locals.battleResult != "defenderWins"){
     return next()
@@ -162,9 +155,7 @@ module.exports.updateArmyPower = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in updating army power" });
+      return res.status(500).json({ message: "Internal server error in updating army power" });
     }
     if (results.affectedRows === 0) {
       return res.status(404).json({ message: "Army not found" });
@@ -178,7 +169,8 @@ module.exports.updateArmyPower = (req, res, next) => {
   model.updateArmyPowerById(data, callback);
 };
 
-// Update army size for battle
+
+// Reduce army size.
 module.exports.reduceArmySize = (req, res, next) => {
   const attackerArmy = res.locals.attackerArmy;
 
@@ -196,9 +188,7 @@ module.exports.reduceArmySize = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in reducing army size" });
+      return res.status(500).json({ message: "Internal server error in reducing army size" });
     }
     if (results.affectedRows === 0) {
       return res.status(404).json({ message: "Army not found" });
@@ -212,7 +202,8 @@ module.exports.reduceArmySize = (req, res, next) => {
   model.updateArmySizeById(data, callback);
 };
 
-// Delete army as battle outcome
+
+// Delete army by id.
 module.exports.deleteArmyById = (req, res, next) => {
   if (
       res.locals.battleResult != "attackerWins"    )
@@ -230,3 +221,8 @@ module.exports.deleteArmyById = (req, res, next) => {
 
   model.deleteById(data, callback);
 };
+
+
+
+
+

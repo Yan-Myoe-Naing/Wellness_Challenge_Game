@@ -1,13 +1,12 @@
 const model = require("../models/diplomacyModel");
 
-// Get all diplomacies
+
+// Read all diplomacy.
 module.exports.readAllDiplomacy = (req, res, next) => {
   const callback = (error, results, fields) => {
     if (error) {
       console.log("Error readAllDiplomacy:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting all diplomacies" });
+      return res.status(500).json({ message: "Internal server error in getting all diplomacies" });
     } else {
       res.locals.allDiplomacies = results;
       next();
@@ -17,7 +16,8 @@ module.exports.readAllDiplomacy = (req, res, next) => {
   model.selectAll(callback);
 };
 
-//Get diplomacy with ID
+
+// Read diplomacy by id.
 module.exports.readDiplomacyById = (req, res, next) => {
   const data = {
     diplomacy_id: req.params.diplomacy_id || res.locals.diplomacyId,
@@ -42,7 +42,8 @@ module.exports.readDiplomacyById = (req, res, next) => {
   model.selectById(data, callback);
 };
 
-//Get diplomacy with user_id
+
+// Read diplomacy by user id.
 module.exports.readDiplomacyByUserId = (req, res, next) => {
   const data = {
     user_id:
@@ -85,37 +86,36 @@ module.exports.readDiplomacyByUserId = (req, res, next) => {
   model.selectByUserId(data, callback);
 };
 
-// Get diplomacy overview in one call (raw)
+
+// Read overview.
 module.exports.readOverview = (req, res, next) => {
   const data = { user_id: res.locals.userId };
 
   const callback = (error, results) => {
     if (error) {
       console.log("Error readOverview:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting diplomacy overview" });
+      return res.status(500).json({ message: "Internal server error in getting diplomacy overview" });
     }
 
-    const [allRows, userRows, pendingRows] = results;
+    const [allRows, userRows, pendingRows, sentRows] = results;
     res.locals.allDiplomacies = allRows || [];
     res.locals.myDiplomacies = userRows || [];
     res.locals.pendingRequests = pendingRows || [];
+    res.locals.myRequests = sentRows || [];
     next();
   };
 
   model.selectOverview(data, callback);
 };
 
-// Create new war record
+
+// Create new war.
 module.exports.createNewWar = (req, res, next) => {
   const senderId = res.locals.userId;
   const receiverId = req.body.target_id;
 
   if (senderId == undefined || receiverId == undefined) {
-    return res
-      .status(400)
-      .json({ message: "sender_id and receiver_id are required" });
+    return res.status(400).json({ message: "sender_id and receiver_id are required" });
   }
 
   const data = {
@@ -127,9 +127,7 @@ module.exports.createNewWar = (req, res, next) => {
   const callback = (error, results, fields) => {
     if (error) {
       console.log(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error creating war record" });
+      return res.status(500).json({ message: "Internal server error creating war record" });
     } else {
       res.locals.diplomacyId = results.insertId;
       next();
@@ -139,7 +137,8 @@ module.exports.createNewWar = (req, res, next) => {
   model.insertDiplomacy(data, callback);
 };
 
-// Create new diplomacy record(alliance or peace)
+
+// Create new diplomacy.
 module.exports.createNewDiplomacy =  (req, res, next) => {
   const { sender_id, receiver_id, type } = res.locals.request;
 
@@ -152,9 +151,7 @@ module.exports.createNewDiplomacy =  (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.log(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error creating diplomacy" });
+      return res.status(500).json({ message: "Internal server error creating diplomacy" });
     } else {
       res.locals.diplomacyId = results.insertId;
       next();
@@ -164,12 +161,12 @@ module.exports.createNewDiplomacy =  (req, res, next) => {
   model.insertDiplomacy(data, callback);
 };
 
-// Delete diplomacy by id
+
+// Delete diplomacy by id.
 module.exports.deleteDiplomacyById = (req, res, next) => {
   const diplomacyId = res.locals.warId || req.params.diplomacy_id;
 
   if (diplomacyId == undefined) {
-    // Nothing to delete
     return next();
   }
 
@@ -178,18 +175,19 @@ module.exports.deleteDiplomacyById = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.log(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error deleting diplomacy" });
+      return res.status(500).json({ message: "Internal server error deleting diplomacy" });
     }
-    if (req.method === "DELETE") {
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ message: "Diplomacy record not found" });
-      }
-      return res.status(200).json({message: "Diplomacy deleted"});
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "Diplomacy record not found" });
     }
+    res.locals.deletedDiplomacy = results;
     next();
   };
 
   model.deleteById(data, callback);
 };
+
+
+
+
+

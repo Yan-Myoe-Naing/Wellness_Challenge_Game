@@ -1,14 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
+
+
+// callback.
   const callback = (responseStatus, responseData) => {
-    console.log("responseStatus:", responseStatus);
-    console.log("responseData:", responseData);
-    if (responseStatus == 200 || responseStatus == 201) {
-      // Check if login was successful
+    if (responseStatus == 200) {
       if (responseData.token) {
-        // Store the token in local storage
         localStorage.setItem("token", responseData.token);
-        // Redirect or perform further actions for logged-in user
-        window.location.href = "index.html";
+        window.location.href = "profile.html";
       }
     } else {
       warningCard.classList.remove("d-none");
@@ -21,21 +19,31 @@ document.addEventListener("DOMContentLoaded", function () {
   const warningCard = document.getElementById("warningCard");
   const warningText = document.getElementById("warningText");
 
+  if (!loginForm) return;
+
   loginForm.addEventListener("submit", function (event) {
-    console.log("loginForm.addEventListener");
     event.preventDefault();
 
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
+    if (!/^[A-Za-z0-9]{3,20}$/.test(username)) {
+      warningCard.classList.remove("d-none");
+      warningText.innerText = "Username must be 3-20 characters (letters and numbers only).";
+      return;
+    }
+    if (String(password).length < 4) {
+      warningCard.classList.remove("d-none");
+      warningText.innerText = "Password must be at least 4 characters.";
+      return;
+    }
+
     const data = {
       username: username,
       password: password,
     };
-    // Perform login request
     fetchMethod(currentUrl + "/api/auth/login", callback, "POST", data);
 
-    // Reset the form fields
     loginForm.reset();
   });
 });

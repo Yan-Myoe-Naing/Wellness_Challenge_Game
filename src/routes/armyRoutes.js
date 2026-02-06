@@ -7,41 +7,8 @@ const pointExchange = require("../middlewares/pointServices");
 const jwtMiddleware = require("../middlewares/jwtMiddleware");
 const armyMiddleware = require("../middlewares/armyMiddleware")
 const responseMiddleware = require("../middlewares/responseMiddleware");
-const {
-  withMessage,
-  withDynamicMessage,
-  sendResponse,
-} = require("../middlewares/response");
-const { verify } = require("jsonwebtoken");
+const { withMessage, withDynamicMessage, sendResponse } = require("../middlewares/response");
 
-// GET /armies
-router.get(
-  "/",
-  controller.readAllArmy,
-  withMessage("All army details:", 200),
-  sendResponse,
-);
-
-// GET /armies/army_id
-router.get(
-  "/:army_id",
-  controller.readArmyById(""),
-  withDynamicMessage((req, res) => `Army ${req.params.army_id} details:`, 200),
-  sendResponse,
-);
-
-// GET /armies/users/user
-router.get(
-  "/users/user",
-  jwtMiddleware.verifyToken,
-  cityController.readCityByUserId,
-  controller.readArmyByCityId,
-  withDynamicMessage(
-    (req, res) => `Army details of user ${res.locals.userId}:`,
-    200,
-  ),
-  sendResponse,
-);
 
 // GET /armies/:army_id/getBuyableSize
 router.get(
@@ -59,6 +26,7 @@ router.get(
   ),
   sendResponse,
 );
+
 
 // PUT /armies/:army_id/buySoldiers
 router.put(
@@ -82,3 +50,4 @@ router.put(
 );
 
 module.exports = router;
+

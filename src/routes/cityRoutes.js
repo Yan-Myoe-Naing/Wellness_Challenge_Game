@@ -8,32 +8,8 @@ const cityMiddleware = require("../middlewares/cityMiddleware");
 const armyMiddleware = require("../middlewares/armyMiddleware");
 const jwtMiddleware = require("../middlewares/jwtMiddleware")
 const responseMiddleware = require("../middlewares/responseMiddleware");
-const {
-  withMessage,
-  withDynamicMessage,
-  sendResponse,
-} = require("../middlewares/response");
+const { withMessage, withDynamicMessage, sendResponse } = require("../middlewares/response");
 
-// GET /cities
-router.get(
-  "/",
-  controller.readAllCity,
-  withMessage("All city details:", 200),
-  sendResponse,
-);
-
-// GET /cities/me
-router.get(
-  "/me",
-  jwtMiddleware.verifyToken,
-  userController.readUserById,
-  controller.readCityByUserId,
-  withDynamicMessage(
-    (req, res) => `City details of user ${res.locals.userId}:`,
-    200,
-  ),
-  sendResponse,
-);
 
 // GET /cities/overview
 router.get(
@@ -48,25 +24,6 @@ router.get(
   sendResponse,
 );
 
-// GET /cities/battleable
-router.get(
-  "/battleable",
-  jwtMiddleware.verifyToken,
-  userController.readUserById,
-  controller.readWarTargetsByUserId,
-  controller.readCityByUserIdAllowEmpty,
-  armyController.readArmyByCityId,
-  withMessage("Battleable cities:", 200),
-  sendResponse,
-);
-
-// GET /cities/city_id
-router.get(
-  "/:city_id",
-  controller.readCityById,
-  withDynamicMessage((req, res) => `City ${req.params.city_id} details:`, 200),
-  sendResponse,
-);
 
 // POST /cities
 router.post(
@@ -92,3 +49,4 @@ router.post(
 );
 
 module.exports = router;
+

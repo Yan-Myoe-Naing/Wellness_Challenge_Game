@@ -1,43 +1,65 @@
-// Optimal CA2 Modularity + Code Quality Style
-
 let token = null;
-let citiesArray = [];
-
-// Event: DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function () {
-    token = localStorage.getItem("token");
-    if (!token) {
-        showToast("Please log in to view your profile.", false);
-        window.location.href = "index.html";
-        return;
-    }
+    token = ensureTokenOrRedirect("index.html");
+    if (!token) return;
 
-    if (typeof window.currentUrl === "undefined") {
-        window.currentUrl = window.location.origin;
-    }
-    if (window.currentUrl === "null") {
-        showToast("Open this page via http://localhost:3000 (not file://).", false);
-        return;
-    }
+    if (!ensureBaseUrlOrWarn()) return;
 
-    eventListeners(token);
+    buildProfileModal();
+    eventListeners();
     loadProfile(token);
 });
 
-// Add all the Event Listeners
-function eventListeners(token) {
-    document.getElementById("cityForm")?.addEventListener("submit", function (event) {
-        createCity(token, event);
-    });
-    document.getElementById("buySoldiersForm")?.addEventListener("submit", function (event) {
-        buySoldiers(token, event);
-    });
-    document.getElementById("soldiersAmount")?.addEventListener("input", sanitizeSoldiersAmount);
-    document.getElementById("cityList")?.addEventListener("click", function (event) {
-        openBuySoldiersModal(token, event);
+
+
+// buildProfileModal.
+function buildProfileModal() {
+    if (typeof buildModal !== "function") return;
+    buildModal({
+        id: "editUsernameModal",
+        title: "Edit Username",
+        bodyHtml: `
+          <form id="editUsernameForm">
+            <div class="form-group">
+              <label for="editUsernameInput">New username</label>
+              <input type="text" class="form-control" id="editUsernameInput" required>
+            </div>
+          </form>
+        `,
+        footerHtml: `
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" form="editUsernameForm" class="btn btn-primary">Save</button>
+        `,
     });
 }
 
+
+
+// eventListeners.
+function eventListeners() {
+    document.getElementById("editUsernameBtn")?.addEventListener("click", function () {
+        openEditUsernameModal();
+    });
+
+    document.getElementById("editUsernameForm")?.addEventListener("submit", function (event) {
+        event.preventDefault();
+        updateUsername();
+    });
+}
+
+
+
+// openEditUsernameModal.
+function openEditUsernameModal() {
+    const current = document.getElementById("profileUsername")?.textContent || "";
+    const input = document.getElementById("editUsernameInput");
+    if (input) input.value = current.trim();
+    if (typeof showModal === "function") showModal("editUsernameModal");
+}
+
+
+
+// loadProfile.
 function loadProfile(token) {
     const usernameEl = document.getElementById("profileUsername");
     const userIdEl = document.getElementById("profileUserId");
@@ -45,6 +67,9 @@ function loadProfile(token) {
 
     if (!usernameEl || !userIdEl || !pointsEl) return;
 
+
+
+// callback.
     const callback = (responseStatus, responseData) => {
         if (handleAuthFailure(responseStatus, responseData)) return;
         if (responseStatus !== 200 || !responseData?.data?.profile) {
@@ -63,20 +88,25 @@ function loadProfile(token) {
 
         const cities = profile.cities || [];
         const armies = profile.armies || [];
+
+
+// armiesByCityId.
         const armiesByCityId = armies.reduce((map, army) => {
             map[army.city_id] = army;
             return map;
         }, {});
 
-        citiesArray = cities;
-        renderCityCards(cities, armiesByCityId, false, token);
-        renderDiplomacies(profile.diplomacies || []);
-        renderPendingRequests(profile.pendingRequests || []);
+        showCityCards(cities, armiesByCityId, false);
+        showDiplomacies(profile.diplomacies || []);
+        showPendingRequests(profile.pendingRequests || []);
     };
 
     fetchMethod(currentUrl + "/api/users/profile", callback, "GET", null, token);
 }
 
+
+
+// handleAuthFailure.
 function handleAuthFailure(responseStatus, responseData) {
     if (responseStatus === 401 || responseStatus === 403) {
         showToast(responseData?.message || "Session expired. Please log in again.", false);
@@ -89,69 +119,50 @@ function handleAuthFailure(responseStatus, responseData) {
     return false;
 }
 
-// Create City for the User
-function createCity(token, event) {
-    if (event?.preventDefault) {
-        event.preventDefault();
+
+
+// updateUsername.
+function updateUsername() {
+    const input = document.getElementById("editUsernameInput");
+    if (!input) return;
+    const username = input.value.trim();
+    if (!/^[A-Za-z0-9]{3,20}$/.test(username)) {
+        showToast("Username must be 3-20 characters (letters and numbers only).", false);
+        return;
     }
 
-        // Reference city name input DIV
-        const name = document.getElementById("city_name").value;
-        const cityList = document.getElementById("cityList"); 
+    const data = { username };
 
-        // Create the Data Object for Fetch Method (req.body)
-        const data = {
-            city_name: name
-        }
 
-        const callback = (responseStatus, responseData) => {
-
-            // If city was successfully created
-            if (responseStatus == 201) {
-                
-                const city = responseData.data.city;
-                const army = responseData.data.army || null;
-                citiesArray.push(city);
-
-                // Append new city card
-                renderCityCards([city], army ? { [army.city_id]: army } : {}, true);
-                updatePointsDisplay(responseData?.data?.newPoints);
-                showToast(responseData?.message || "City created.", true);
-
-                const modalEl = document.getElementById("createCityModal");
-                if (modalEl && window.bootstrap) {
-                    const modalInstance = window.bootstrap.Modal.getInstance(modalEl);
-                    if (modalInstance) {
-                        modalInstance.hide();
-                    }
-                }
-            } else {
-                const warningCard = document.getElementById("warningCard");
-                const warningText = document.getElementById("warningText");
-                if (warningCard && warningText) {
-                    warningCard.classList.remove("d-none");
-                    warningText.textContent = responseData?.message || "Failed to create city.";
-                }
-                showToast(responseData?.message || "Failed to create city.", false);
+// callback.
+    const callback = (responseStatus, responseData) => {
+        if (handleAuthFailure(responseStatus, responseData)) return;
+        if (responseStatus === 200) {
+            const updated = responseData?.data?.user;
+            if (updated?.username) {
+                const nameEl = document.getElementById("profileUsername");
+                if (nameEl) nameEl.textContent = updated.username;
             }
+            if (typeof hideModal === "function") hideModal("editUsernameModal");
+            showToast(responseData?.message || "Username updated.", true);
+        } else {
+            showToast(responseData?.message || "Failed to update username.", false);
         }
+    };
 
-        // POST /city for User based on User ID in Token
-        fetchMethod(currentUrl + '/api/cities', callback, "POST", data, token);
+    fetchMethod(currentUrl + "/api/users", callback, "PUT", data, token);
 }
 
-function renderCityCards(cities, armiesByCityId, appendOnly, token) {
-    // Reference citylist DIV
+
+
+// showCityCards.
+function showCityCards(cities, armiesByCityId, appendOnly) {
     const cityList = document.getElementById("cityList");
     if (!cityList) return;
     if (!appendOnly) {
         cityList.innerHTML = "";
     }
-
-    // Loop through array of city data
     cities.forEach((city) => {
-        
-        // Create a DIV for each city
         const displayItem = document.createElement("div");
 
         displayItem.className =
@@ -165,15 +176,9 @@ function renderCityCards(cities, armiesByCityId, appendOnly, token) {
                     <p class="mb-1" data-army-field="soldiers">Soldiers: ${army.soldiers ?? 0}</p>
                     <p class="mb-1" data-army-field="power">Power: ${army.army_power ?? "N/A"}</p>
                     <p class="mb-1" data-army-field="max">Max size: ${army.max_capacity ?? "N/A"}</p>
-                    <p class="mb-0">Buyable: <span class="buyable-size" data-army-id="${army.id}">...</span></p>
                 </div>
-                <button class="btn btn-outline-warning btn-sm mt-3 buy-soldiers-btn" data-army-id="${army.id}">
-                    Buy Soldiers
-                </button>
               `
             : `<div class="city-army mt-3"><p class="mb-0">No army data.</p></div>`;
-        
-        // Fill in the data for each city DIV
         displayItem.innerHTML = `
             <div class="card city-card h-100">
                 <div class="card-body">
@@ -185,168 +190,14 @@ function renderCityCards(cities, armiesByCityId, appendOnly, token) {
                 </div>
             </div>
             `;
-        // Append DIV (add to back) to list 
         cityList.appendChild(displayItem);
-
-        if (army) {
-            fetchBuyableSize(army.id, token);
-        }
     });
 }
 
-function fetchBuyableSize(armyId, token) {
-    const callback = (responseStatus, responseData) => {
-        const target = document.querySelector(`.buyable-size[data-army-id="${armyId}"]`);
-        if (!target) return;
 
-        if (responseStatus === 200 && responseData?.data?.buyableSize != null) {
-            target.textContent = responseData.data.buyableSize;
-            updateBuySoldiersLimit(armyId, responseData.data.buyableSize);
-        } else {
-            target.textContent = "N/A";
-        }
-    };
 
-    fetchMethod(currentUrl + "/api/armies/" + armyId + "/getBuyableSize", callback, "GET", null, token);
-}
-
-function updateBuySoldiersLimit(armyId, buyableSize) {
-    const buyArmyId = document.getElementById("buyArmyId");
-    const soldiersAmountInput = document.getElementById("soldiersAmount");
-    const buyableMaxText = document.getElementById("buyableMaxText");
-    if (!buyArmyId || !soldiersAmountInput || !buyableMaxText) return;
-
-    if (buyArmyId.value === String(armyId)) {
-        const maxValue = Number(buyableSize) || 0;
-        soldiersAmountInput.max = String(maxValue);
-        soldiersAmountInput.value = "";
-        buyableMaxText.textContent = String(maxValue);
-        soldiersAmountInput.disabled = maxValue === 0;
-    }
-}
-
-function updatePointsDisplay(newPoints) {
-    const pointsEl = document.getElementById("profilePoints");
-    if (!pointsEl || newPoints == null) return;
-    pointsEl.textContent = String(newPoints);
-}
-
-function updateArmyCard(army, buyableSize) {
-    if (!army?.id) return;
-    const armyBlock = document.querySelector(`.city-army[data-army-id="${army.id}"]`);
-    if (!armyBlock) return;
-
-    const soldiersEl = armyBlock.querySelector('[data-army-field="soldiers"]');
-    const powerEl = armyBlock.querySelector('[data-army-field="power"]');
-    const maxEl = armyBlock.querySelector('[data-army-field="max"]');
-    if (soldiersEl) soldiersEl.textContent = `Soldiers: ${army.soldiers ?? 0}`;
-    if (powerEl) powerEl.textContent = `Power: ${army.army_power ?? "N/A"}`;
-    if (maxEl) maxEl.textContent = `Max size: ${army.max_capacity ?? "N/A"}`;
-
-    if (buyableSize != null) {
-        const buyableEl = document.querySelector(`.buyable-size[data-army-id="${army.id}"]`);
-        if (buyableEl) buyableEl.textContent = String(buyableSize);
-    }
-}
-
-function sanitizeSoldiersAmount(event) {
-    const target = event?.target;
-    if (!target) return;
-    if (Number(target.value) < 0) {
-        target.value = "0";
-    }
-}
-
-function openBuySoldiersModal(token, armyIdOrEvent) {
-    let armyId = armyIdOrEvent;
-    if (armyIdOrEvent?.target) {
-        const button = armyIdOrEvent.target?.closest?.(".buy-soldiers-btn");
-        if (!button) return;
-        armyId = button.getAttribute("data-army-id");
-    }
-
-    const buyArmyId = document.getElementById("buyArmyId");
-    const soldiersAmountInput = document.getElementById("soldiersAmount");
-    const buyableMaxText = document.getElementById("buyableMaxText");
-    const warningCard = document.getElementById("buySoldiersWarning");
-    const warningText = document.getElementById("buySoldiersWarningText");
-
-    if (!buyArmyId || !soldiersAmountInput || !buyableMaxText) return;
-    buyArmyId.value = armyId || "";
-    soldiersAmountInput.value = "";
-    buyableMaxText.textContent = "0";
-    soldiersAmountInput.disabled = false;
-    if (warningCard && warningText) {
-        warningCard.classList.add("d-none");
-        warningText.textContent = "";
-    }
-
-    const modalEl = document.getElementById("buySoldiersModal");
-    if (modalEl && window.bootstrap) {
-        const modalInstance = new window.bootstrap.Modal(modalEl);
-        modalInstance.show();
-    }
-
-    if (armyId) {
-        fetchBuyableSize(armyId, token);
-    }
-}
-
-function buySoldiers(token, event) {
-    if (event?.preventDefault) {
-        event.preventDefault();
-    }
-    const buyArmyId = document.getElementById("buyArmyId");
-    const soldiersAmountInput = document.getElementById("soldiersAmount");
-    const warningCard = document.getElementById("buySoldiersWarning");
-    const warningText = document.getElementById("buySoldiersWarningText");
-
-    if (!buyArmyId || !soldiersAmountInput) return;
-
-    const armyId = buyArmyId.value;
-    const soldiers = Number(soldiersAmountInput.value);
-
-    if (!armyId || !soldiers || soldiers <= 0) {
-        if (warningCard && warningText) {
-            warningCard.classList.remove("d-none");
-            warningText.textContent = "Please enter a valid soldier amount.";
-        }
-        return;
-    }
-
-    const data = { soldiers };
-
-    const callback = (responseStatus, responseData) => {
-        if (handleAuthFailure(responseStatus, responseData)) return;
-        if (responseStatus === 200) {
-            updateArmyCard(responseData?.data?.army, responseData?.data?.buyableSize);
-            updatePointsDisplay(responseData?.data?.newPoints);
-            fetchBuyableSize(armyId, token);
-            const validationMessage = responseData?.data?.validationMessage;
-            const message = validationMessage
-                ? `${responseData?.message || "Success."} ${validationMessage}`
-                : (responseData?.message || "Soldiers bought.");
-            showToast(message, true);
-
-            const modalEl = document.getElementById("buySoldiersModal");
-            if (modalEl && window.bootstrap) {
-                const modalInstance = window.bootstrap.Modal.getInstance(modalEl);
-                if (modalInstance) {
-                    modalInstance.hide();
-                }
-            }
-        } else if (warningCard && warningText) {
-            warningCard.classList.remove("d-none");
-            warningText.textContent =
-                responseData?.message || "Failed to buy soldiers.";
-            showToast(responseData?.message || "Failed to buy soldiers.", false);
-        }
-    };
-
-    fetchMethod(currentUrl + "/api/armies/" + armyId + "/buySoldiers", callback, "PUT", data, token);
-}
-
-function renderDiplomacies(diplomacies) {
+// showDiplomacies.
+function showDiplomacies(diplomacies) {
     const listEl = document.getElementById("diplomacyList");
     if (!listEl) return;
 
@@ -372,7 +223,10 @@ function renderDiplomacies(diplomacies) {
     });
 }
 
-function renderPendingRequests(requests) {
+
+
+// showPendingRequests.
+function showPendingRequests(requests) {
     const listEl = document.getElementById("pendingDiplomacyList");
     if (!listEl) return;
 
@@ -398,3 +252,4 @@ function renderPendingRequests(requests) {
         listEl.appendChild(card);
     });
 }
+

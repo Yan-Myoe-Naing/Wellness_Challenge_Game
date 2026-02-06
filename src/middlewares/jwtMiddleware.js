@@ -1,14 +1,11 @@
-// Import Modules
 require("dotenv").config(); 
 const jwt = require("jsonwebtoken");
-
-// Import Parameters from .env
 const secretKey = process.env.JWT_SECRET_KEY;
 const tokenDuration = process.env.JWT_EXPIRES_IN;
 const tokenAlgorithm = process.env.JWT_ALGORITHM;
 
-// Generate Token 
-// Use in Register & Login Routes, generates token with provided userId
+
+// Generate token.
 module.exports.generateToken = (req, res, next) => {
   const payload = {
     userId: res.locals.userId,
@@ -33,8 +30,8 @@ module.exports.generateToken = (req, res, next) => {
   const token = jwt.sign(payload, secretKey, options, callback);
 };
 
-// Send Token
-// Sends generated token to frontend to store for future use
+
+// Send token.
 module.exports.sendToken = (req, res, next) => {
   res.status(200).json({
     message: res.locals.message,
@@ -42,8 +39,8 @@ module.exports.sendToken = (req, res, next) => {
   });
 };
 
-// Verify Token 
-// Used at the start of most routes to get secure userId
+
+// Verify token.
 module.exports.verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -70,3 +67,6 @@ module.exports.verifyToken = (req, res, next) => {
 
   jwt.verify(token, secretKey, callback);
 };
+
+
+

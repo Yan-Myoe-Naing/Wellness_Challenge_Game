@@ -1,4 +1,4 @@
-// Format response after creating a city (includes city and army info)
+// Format create city response.
 module.exports.formatCreateCityResponse = (req, res, next) => {
   res.locals = {
     message: res.locals.message,
@@ -10,7 +10,8 @@ module.exports.formatCreateCityResponse = (req, res, next) => {
   next();
 };
 
-// Format response for retrieving buyable army size
+
+// Format get buyable size response.
 module.exports.formatGetBuyableSizeResponse = (req, res, next) => {
   res.locals = {
     message: res.locals.message,
@@ -20,7 +21,8 @@ module.exports.formatGetBuyableSizeResponse = (req, res, next) => {
   next();
 };
 
-// Format response after buying soldiers (includes points and validation info)
+
+// Format buy soldiers response.
 module.exports.formatBuySoldiersResponse = (req, res, next) => {
   res.locals = {
     message: res.locals.message,
@@ -35,7 +37,8 @@ module.exports.formatBuySoldiersResponse = (req, res, next) => {
   next();
 };
 
-// Format response for alliance request
+
+// Format request alliance response.
 module.exports.formatRequestAllianceResponse = (req, res, next) => {
   res.locals = {
     message: res.locals.message,
@@ -45,7 +48,8 @@ module.exports.formatRequestAllianceResponse = (req, res, next) => {
   next();
 };
 
-// Format response for diplomacy request (optionally includes diplomacy record)
+
+// Format diplomacy request response.
 module.exports.formatDiplomacyRequestResponse = (req, res, next) => {
   const { message, status, request, diplomacy } = res.locals;
 
@@ -63,7 +67,8 @@ module.exports.formatDiplomacyRequestResponse = (req, res, next) => {
   next();
 };
 
-// Format response after accepting a diplomacy request
+
+// Format diplomacy accept response.
 module.exports.formatDiplomacyAcceptResponse = (req, res, next) => {
   res.locals = {
     message: res.locals.message,
@@ -74,7 +79,8 @@ module.exports.formatDiplomacyAcceptResponse = (req, res, next) => {
   next();
 };
 
-// Format response for battle results
+
+// Format battle response.
 module.exports.formatBattleResponse = (req, res, next) => {
   res.locals = {
     message: res.locals.message,
@@ -84,3 +90,7 @@ module.exports.formatBattleResponse = (req, res, next) => {
   };
   next();
 };
+
+
+
+

@@ -1,3 +1,5 @@
+
+/* :root */
 :root {
   --ink: #f5f5f5;
   --accent: #ffd36a;
@@ -6,20 +8,27 @@
   --panel-border: rgba(255, 255, 255, 0.2);
   --brand-bg: rgba(22, 30, 40, 0.72);
   --brand-border: rgba(255, 255, 255, 0.26);
+  --panel-strong: rgba(18, 26, 36, 0.86);
+  --glow: rgba(255, 211, 106, 0.25);
 }
 
 *,
 *::before,
+
+/* *::after */
 *::after {
   box-sizing: border-box;
 }
 
+
+/* body */
 body {
   min-height: 100vh;
   color: var(--ink);
   display: flex;
   flex-direction: column;
   margin: 0;
+  line-height: 1.6;
   background:
     linear-gradient(180deg, rgba(6, 10, 16, 0.35), rgba(6, 10, 16, 0.55)),
     url("https://raw.githubusercontent.com/YanMyoeNaing/website_assets/main/indexBackground.gif")
@@ -27,8 +36,44 @@ body {
   font-family: "Pixelify Sans", "VT323", "Jersey 10", "Trebuchet MS", Tahoma, sans-serif;
 }
 
+
+/* body::before */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at top, rgba(255, 211, 106, 0.08), transparent 45%),
+    radial-gradient(circle at 20% 40%, rgba(76, 215, 166, 0.06), transparent 42%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+
+/* main */
 main {
   flex: 1 0 auto;
 }
 
+
+/* a */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+
+/* a:hover */
+a:hover {
+  color: var(--accent-strong);
+}
+
+
+/* .page-shell */
+.page-shell {
+  padding-bottom: 3rem;
+}
+
 @import url("https://fonts.googleapis.com/css2?family=Jersey+10&family=Pixelify+Sans:wght@400..700&family=VT323&display=swap");
+

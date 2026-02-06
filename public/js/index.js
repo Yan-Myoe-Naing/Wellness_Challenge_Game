@@ -20,6 +20,9 @@ document.addEventListener("DOMContentLoaded", function () {
   fetchMethod(currentUrl + "/api/users/me", onUserLoaded, "GET", null, token);
 });
 
+
+
+// onUserLoaded.
 function onUserLoaded(status, data) {
   if (status !== 200) return;
   const user = data?.data?.user;

@@ -1,4 +1,4 @@
-// Store defender army ID from request body
+// Store defender army id.
 module.exports.storeDefenderArmyId = (req, res, next) => {
   const defenderArmyId = req.body.defender_army_id;
   if (defenderArmyId == undefined) {
@@ -11,7 +11,8 @@ module.exports.storeDefenderArmyId = (req, res, next) => {
   next();
 };
 
-// Validate that attacker and defender are at war before battle
+
+// Validate diplomacy status.
 module.exports.validateDiplomacyStatus = (req, res, next) => {
   const diplomacyRecords =
     res.locals.senderDiplomacy ||
@@ -20,15 +21,11 @@ module.exports.validateDiplomacyStatus = (req, res, next) => {
     [];
   const attackerId = res.locals.attackerUserId;
   const defenderId = res.locals.defenderUserId;
-
-  // Prevent self-battle
   if (attackerId == defenderId) {
     return res.status(409).json({
       message: "Cannot battle your own city",
     });
   }
-
-  // Check if any diplomacy record shows war status between attacker and defender
   const isAtWar = diplomacyRecords.some(
     (d) =>
       ((d.initiator_id === attackerId && d.responder_id === defenderId) ||
@@ -46,18 +43,15 @@ module.exports.validateDiplomacyStatus = (req, res, next) => {
   next();
 };
 
-// Calculate battle result based on army power and soldiers
+
+// Calculate battle result.
 module.exports.calculateBattleResult = (req, res, next) => {
   const attackerArmy = res.locals.attackerArmy;
   const defenderArmy = res.locals.defenderArmy;
 
   if (!attackerArmy || !defenderArmy) {
-    return res
-      .status(400)
-      .json({ message: "Both attacker and defender armies are required" });
+    return res.status(400).json({ message: "Both attacker and defender armies are required" });
   }
-
-  // Compute total power = army_power * soldiers
   const attackerPower =
     Number(attackerArmy.army_power) * Number(attackerArmy.soldiers);
   const defenderPower =
@@ -71,7 +65,7 @@ module.exports.calculateBattleResult = (req, res, next) => {
     outcome = "defenderWins";
     res.locals.winnerUserId = res.locals.defenderUserId;
   } else {
-    outcome = "defenderWins"; // tie defaults to defender
+    outcome = "defenderWins";
     res.locals.winnerUserId = res.locals.defenderUserId;
   }
 
@@ -82,7 +76,8 @@ module.exports.calculateBattleResult = (req, res, next) => {
   next();
 };
 
-// Add actual reward info to battle history records
+
+// Add actual reward.
 module.exports.addActualReward = (req, res, next) => {
   const battles = res.locals.battleHistory || [];
 
@@ -105,3 +100,8 @@ module.exports.addActualReward = (req, res, next) => {
 
   next();
 };
+
+
+
+
+

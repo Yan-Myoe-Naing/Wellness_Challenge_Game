@@ -1,23 +1,12 @@
-//////////////////////////////////////////////////////
-// REQUIRE BCRYPT MODULE
-//////////////////////////////////////////////////////
 const bcrypt = require("bcrypt");
 
-/*
-require("dotenv").config(); 
+require("dotenv").config();
 const pepper = process.env.BCRYPT_PEPPER;
-*/
-
-//////////////////////////////////////////////////////
-// SET SALT ROUNDS
-//////////////////////////////////////////////////////
 const saltRounds = 10;
 
-//////////////////////////////////////////////////////
-// MIDDLEWARE FUNCTION FOR COMPARING PASSWORD
-//////////////////////////////////////////////////////
+
+// Compare password.
 module.exports.comparePassword = (req, res, next) => {
-  // Check password
   const callback = (err, isMatch) => {
     if (err) {
       console.error("Error bcrypt:", err);
@@ -32,14 +21,11 @@ module.exports.comparePassword = (req, res, next) => {
       }
     }
   };
-  //  bcrypt.compare(req.body.password + pepper, res.locals.hash, callback);
-  bcrypt.compare(req.body.password, res.locals.hash, callback);
+  bcrypt.compare(req.body.password + pepper, res.locals.hash, callback);
 };
 
 
-//////////////////////////////////////////////////////
-// MIDDLEWARE FUNCTION FOR HASHING PASSWORD
-//////////////////////////////////////////////////////
+// Hash password.
 module.exports.hashPassword = (req, res, next) => {
     if (req.body.password == undefined) {
     return res.status(400).json({ message: "Password is undefined" });
@@ -53,6 +39,9 @@ module.exports.hashPassword = (req, res, next) => {
       next();
     }
   };
-  //  bcrypt.compare(req.body.password + pepper, res.locals.hash, callback);
-  bcrypt.hash(req.body.password, saltRounds, callback);
+  bcrypt.hash(req.body.password + pepper, saltRounds, callback);
 };
+
+
+
+

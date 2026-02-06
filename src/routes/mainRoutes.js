@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const userRoutes = require("./userRoutes");
 const userCompletionRoutes = require("./userCompletionRoutes");
 const wellnessChallengeRoutes = require("./wellnessChallengeRoutes");
@@ -9,7 +8,7 @@ const armyRoutes = require("./armyRoutes");
 const battleRoutes = require("./battleRoutes");
 const diplomacyRequestRoutes = require("./diplomacyRequestRoutes");
 const diplomacyRoutes = require("./diplomacyRoutes");
-const authRoutes = require("./authRoutes")
+const authRoutes = require("./authRoutes");
 
 router.use("/users", userRoutes);
 router.use("/userCompletions", userCompletionRoutes);
@@ -19,6 +18,6 @@ router.use("/armies", armyRoutes);
 router.use("/diplomacyRequests", diplomacyRequestRoutes);
 router.use("/diplomacies", diplomacyRoutes);
 router.use("/battles", battleRoutes);
-router.use("/auth", authRoutes)
+router.use("/auth", authRoutes);
 
 module.exports = router;

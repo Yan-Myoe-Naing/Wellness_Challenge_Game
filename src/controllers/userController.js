@@ -1,13 +1,12 @@
 const model = require("../models/userModel.js");
 
-//Get all users
+
+// Read all user.
 module.exports.readAllUser = (req, res, next) => {
   const callback = (error, results, fields) => {
     if (error) {
       console.log("Error readAllUser:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting all user" });
+      return res.status(500).json({ message: "Internal server error in getting all user" });
     } else {
       res.locals.allUser = results;
       next();
@@ -17,7 +16,8 @@ module.exports.readAllUser = (req, res, next) => {
   model.selectAll(callback);
 };
 
-//Get user with ID
+
+// Read user by id.
 module.exports.readUserById = (req, res, next) => {
   const data = {
     user_id:
@@ -45,7 +45,8 @@ module.exports.readUserById = (req, res, next) => {
   model.selectById(data, callback);
 };
 
-//Get user with ID
+
+// Read self.
 module.exports.readSelf = (req, res, next) => {
   const data = {
     user_id:
@@ -66,14 +67,13 @@ module.exports.readSelf = (req, res, next) => {
   model.selectSelf(data, callback);
 };
 
-// Get users overview (raw data)
+
+// Read overview.
 module.exports.readOverview = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.log("Error readOverview:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting users overview" });
+      return res.status(500).json({ message: "Internal server error in getting users overview" });
     }
 
     const [userRows, diplomacyRows] = results;
@@ -86,16 +86,14 @@ module.exports.readOverview = (req, res, next) => {
 };
 
 
-// Get full profile data in one call
+// Read profile.
 module.exports.readProfile = (req, res, next) => {
   const data = { user_id: res.locals.userId };
 
   const callback = (error, results) => {
     if (error) {
       console.log("Error readProfile:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting profile data" });
+      return res.status(500).json({ message: "Internal server error in getting profile data" });
     }
 
     const [
@@ -121,14 +119,12 @@ module.exports.readProfile = (req, res, next) => {
 };
 
 
-//Check if user name is unique
+// Check username unique.
 module.exports.checkUsernameUnique = (req, res, next) => {
   const username = req.body.username;
 
   if (username == undefined) {
-    return res
-      .status(400)
-      .json({ message: "Username is undefined" });
+    return res.status(400).json({ message: "Username is undefined" });
   }
 
   const callback = (error, results) => {
@@ -143,6 +139,7 @@ module.exports.checkUsernameUnique = (req, res, next) => {
 };
 
 
+// Create new user.
 module.exports.createNewUser = (req, res, next) => {
 
   const data = {
@@ -165,7 +162,7 @@ module.exports.createNewUser = (req, res, next) => {
 };
 
 
-//Update User
+// Update user.
 module.exports.updateUser = (req, res, next) => {
   if (req.body.username == undefined) {
     return res.status(400).json({ message: "Error: data is undefined" });
@@ -190,7 +187,8 @@ module.exports.updateUser = (req, res, next) => {
   model.updateUser(data, callback);
 };
 
-// Reduce user points after city creation
+
+// Reduce point.
 module.exports.reducePoint = (req, res, next) => {
   const userId = res.locals.userId;
   const newPoints = res.locals.newPoints;
@@ -203,9 +201,7 @@ module.exports.reducePoint = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
       console.log(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in reducing points" });
+      return res.status(500).json({ message: "Internal server error in reducing points" });
     } else {
       res.locals.user.points = newPoints;
       next();
@@ -215,16 +211,15 @@ module.exports.reducePoint = (req, res, next) => {
   model.updatePointsById(data, callback);
 };
 
-// Get user by city id which we get from army record
+
+// Read user by army.
 module.exports.readUserByArmy = (req, res, next) => {
   const data = { user_id: res.locals.userId };
 
   const callback = (error, results) => {
     if (error) {
       console.log(error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting user by army" });
+      return res.status(500).json({ message: "Internal server error in getting user by army" });
     }
     if (results.length == 0) {
       return res.status(404).json({ message: "User not found for this army" });
@@ -238,17 +233,12 @@ module.exports.readUserByArmy = (req, res, next) => {
 };
 
 
-// Login
-// This retrieves related User data by username for comparing later
+// Login.
 module.exports.login = (req, res, next) => {
-
-    // 400 Check for all expected input 
     if (req.body.username == undefined ||
         req.body.password == undefined) {
         return res.status(400).json({message: "Username or password is missing."});
     }
-
-    // We only need username to get all the User data first
     const data = {
         username: req.body.username
     };
@@ -262,16 +252,12 @@ module.exports.login = (req, res, next) => {
         } 
         
         else {
-            
-            // If results.length == 0, that means no such user was found.
             if (results.length == 0) {
                 return res.status(404).json({message: "User not found"});
             } 
 
             else {
-                // For comparePassword: hashed password is saved into res.locals.hash
                 res.locals.hash = results[0].password_hash;
-                // For generateToken: Matching userId for input username is saved. 
                 res.locals.userId = results[0].id;
 
                 next();
@@ -281,3 +267,8 @@ module.exports.login = (req, res, next) => {
   
     model.selectUserByUsername(data, callback);
 };
+
+
+
+
+

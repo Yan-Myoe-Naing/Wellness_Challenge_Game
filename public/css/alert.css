@@ -1,3 +1,5 @@
+
+/* .alert-overlay */
 .alert-overlay {
   position: fixed;
   inset: 0;
@@ -8,10 +10,14 @@
   z-index: 1055;
 }
 
+
+/* .alert-overlay.show */
 .alert-overlay.show {
   display: flex;
 }
 
+
+/* .alert-box */
 .alert-box {
   max-width: 420px;
   width: calc(100% - 2rem);
@@ -23,18 +29,54 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
+
+/* .alert-title */
 .alert-title {
   font-family: "Jersey 10", "Pixelify Sans", "VT323", sans-serif;
   letter-spacing: 0.08em;
   margin-bottom: 0.5rem;
 }
 
+
+/* .alert-message */
 .alert-message {
   color: rgba(245, 245, 245, 0.9);
   margin-bottom: 1rem;
 }
 
+
+/* .alert-spinner */
+.alert-spinner {
+  width: 42px;
+  height: 42px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  margin: 0.5rem auto 1rem;
+  animation: alert-spin 0.9s linear infinite;
+  display: none;
+}
+
+
+/* .alert-spinner.show */
+.alert-spinner.show {
+  display: block;
+}
+
+
+/* .alert-actions */
 .alert-actions {
   display: flex;
   justify-content: flex-end;
 }
+
+
+/* @keyframes alert-spin */
+@keyframes alert-spin {
+
+/* to */
+  to {
+    transform: rotate(360deg);
+  }
+}
+

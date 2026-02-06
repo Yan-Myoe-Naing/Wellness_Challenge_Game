@@ -10,7 +10,7 @@ h1, h2 {
 }
 
 /* Sections */
-section {
+section:not(.challenge-hero) {
   border-radius: 8px;
   padding: 1.5rem;
   margin: 1.5rem 0;
@@ -32,6 +32,9 @@ footer {
   color: inherit;
 }
 
+
+/* .text-accent */
 .text-accent {
   color: inherit;
 }
+

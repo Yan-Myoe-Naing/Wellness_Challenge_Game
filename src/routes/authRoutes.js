@@ -7,25 +7,30 @@ const cityMiddleware = require("../middlewares/cityMiddleware");
 const armyMiddleware = require("../middlewares/armyMiddleware");
 const bcryptMiddleware = require("../middlewares/bcryptMiddleware")
 const jwtMiddleware = require("../middlewares/jwtMiddleware")
+const validation = require("../middlewares/authValidation");
 const { withMessage, sendResponse } = require("../middlewares/response");
 
+// POST /auth/register
 router.post(
   "/register",
-  userController.checkUsernameUnique,   // ensure username not taken
-  bcryptMiddleware.hashPassword,        // hash password before saving
-  userController.createNewUser,         // insert user into DB
-  cityMiddleware.getPopulation,               // generate random population
-  cityController.createNewCity,         // create initial city
-  armyMiddleware.getArmyMaxSize,              // calculate max army size
-  armyMiddleware.getArmyPower,                // assign random army power
-  armyController.createNewArmy,         // create initial army
-  jwtMiddleware.generateToken,          // generate JWT
-  jwtMiddleware.sendToken,              // send token back to client
+  validation.validateAuthInput,
+  userController.checkUsernameUnique,
+  bcryptMiddleware.hashPassword,
+  userController.createNewUser,
+  cityMiddleware.getPopulation,
+  cityController.createNewCity,
+  armyMiddleware.getArmyMaxSize,
+  armyMiddleware.getArmyPower,
+  armyController.createNewArmy,
+  jwtMiddleware.generateToken,
+  jwtMiddleware.sendToken,
   withMessage("Player created successfully", 201),
   sendResponse
 );
 
+// POST /auth/login
 router.post("/login", 
+    validation.validateAuthInput,
     userController.login, 
     bcryptMiddleware.comparePassword, 
     jwtMiddleware.generateToken, 

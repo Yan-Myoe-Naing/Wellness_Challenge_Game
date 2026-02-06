@@ -7,11 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const cityNav = document.getElementById("cityNav");
   const diplomacyNav = document.getElementById("diplomacyNav");
   const usersNav = document.getElementById("usersNav");
-
-  // Check if token exists in local storage
   const token = localStorage.getItem("token");
   if (token) {
-    // Token exists, show profile button and hide login and register buttons
     loginButton.classList.add("d-none");
     registerButton.classList.add("d-none");
     profileButton.classList.remove("d-none");
@@ -21,7 +18,6 @@ document.addEventListener("DOMContentLoaded", function () {
     diplomacyNav?.classList.remove("d-none");
     usersNav?.classList.remove("d-none");
   } else {
-    // Token does not exist, show login and register buttons and hide profile and logout buttons
     loginButton.classList.remove("d-none");
     registerButton.classList.remove("d-none");
     profileButton.classList.add("d-none");
@@ -33,8 +29,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   logoutButton.addEventListener("click", function () {
-    // Remove the token from local storage and redirect to index.html
     localStorage.removeItem("token");
     window.location.href = "index.html";
   });
 });
+

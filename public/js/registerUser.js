@@ -1,65 +1,62 @@
-console.log("registerUser.js loaded");
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", initSignup);
+
+
+
+// initSignup.
+function initSignup() {
   const signupForm = document.getElementById("signupForm");
+  if (!signupForm) return;
+  signupForm.addEventListener("submit", handleSignupSubmit);
+}
+
+
+
+// handleSignupSubmit.
+function handleSignupSubmit(event) {
+  event.preventDefault();
+
+  const username = document.getElementById("username").value;
+  const city_name = document.getElementById("city_name").value;
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+
+  if (!/^[A-Za-z0-9]{3,20}$/.test(username)) {
+    showWarning("Username must be 3-20 characters (letters and numbers only).");
+    return;
+  }
+  if (String(password).length < 4) {
+    showWarning("Password must be at least 4 characters.");
+    return;
+  }
+  if (password !== confirmPassword) {
+    showWarning("Passwords do not match");
+    return;
+  }
+
+  const data = { username, password, city_name };
+  fetchMethod(currentUrl + "/api/auth/register", handleSignupResponse, "POST", data);
+}
+
+
+
+// handleSignupResponse.
+function handleSignupResponse(responseStatus, responseData) {
+  const token = responseData?.token;
+  if ((responseStatus === 200 || responseStatus === 201) && token) {
+    localStorage.setItem("token", token);
+    window.location.href = "index.html";
+  } else {
+    showWarning(responseData?.message || "Signup failed");
+  }
+}
+
+
+
+// showWarning.
+function showWarning(message) {
   const warningCard = document.getElementById("warningCard");
   const warningText = document.getElementById("warningText");
-
-  signupForm.addEventListener("submit", function (event) {
-    event.preventDefault();
-    console.log("Signup button clicked");
-
-    const username = document.getElementById("username").value;
-    const city_name = document.getElementById("city_name").value;
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-
-
-console.log("Username:", username);
-console.log("City Name:", city_name);
-console.log("Password:", password);
-
-    // Perform signup logic
-    if (password === confirmPassword) {
-      // Passwords match, proceed with signup
-      console.log("Signup successful");
-      console.log("Username:", username);
-      console.log("City Name:", city_name);
-      console.log("Password:", password);
-      warningCard.classList.add("d-none");
-
-      const data = {
-        username: username,
-        password: password,
-        city_name: city_name
-      };
-
-      const callback = (responseStatus, responseData) => {
-        console.log("responseStatus:", responseStatus);
-        console.log("responseData:", responseData);
-        if (responseStatus == 200) {
-          // Check if signup was successful
-          if (responseData.token) {
-            // Store the token in local storage
-            localStorage.setItem("token", responseData.token);
-            // Redirect or perform further actions for logged-in user
-            window.location.href = "profile.html";
-          }
-        } else {
-          warningCard.classList.remove("d-none");
-          warningText.innerText = responseData.message;
-        }
-      };
-console.log("currentUrl:", currentUrl);
-      // Perform signup request
-      fetchMethod(currentUrl + "/api/auth/register", callback, "POST", data);
-
-      // Reset the form fields
-      signupForm.reset();
-    } else {
-      // Passwords do not match, handle error
-      warningCard.classList.remove("d-none");
-      warningText.innerText = "Passwords do not match";
-    }
-  });
-});
+  warningCard.classList.remove("d-none");
+  warningText.innerText = message;
+}

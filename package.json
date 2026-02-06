@@ -6,7 +6,10 @@
   "scripts": {
     "init_tables": "node src/configs/createSchema.js && node src/configs/initTables.js",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "format": "prettier --write \"src/**/*.js\"",
+    "lint": "eslint \"src/**/*.js\""
+
   },
   "repository": {
     "type": "git",

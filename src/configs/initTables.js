@@ -1,6 +1,10 @@
 const pool = require("../services/db");
 const bcrypt = require("bcrypt");
 
+require("dotenv").config();
+const pepper = process.env.BCRYPT_PEPPER;
+
+
 const saltRounds = 10;
 
 const callback = (error) => {
@@ -12,7 +16,7 @@ const callback = (error) => {
   process.exit();
 };
 
-bcrypt.hash("1234", saltRounds, (err, hash) => {
+bcrypt.hash("1234" + pepper, saltRounds, (err, hash) => {
   if (err) {
     console.error(" Error hashing password:", err);
     process.exit();

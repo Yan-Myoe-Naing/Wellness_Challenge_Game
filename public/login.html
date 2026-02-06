@@ -20,11 +20,13 @@
     <link href="css/toast.css" rel="stylesheet" />
   </head>
   <body class="auth-page">
+    <!-- Navbar -->
     <div id="navbar"></div>
-    <main class="py-5">
+    <main class="py-5 page-shell">
       <div class="container">
         <div class="row justify-content-center mt-4">
           <div class="col-md-7 col-lg-5">
+            <!-- Login card -->
             <div class="auth-card glass-card">
               <h3 class="mb-3 text-center">Welcome Back</h3>
               <p class="text-center auth-subtitle">Log in to continue building your empire.</p>
@@ -39,6 +41,7 @@
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Login</button>
               </form>
+              <!-- Login error message -->
               <div id="warningCard" class="card border-danger mt-3 mb-0 d-none">
                 <div class="card-body text-danger">
                   <p id="warningText" class="card-text"></p>
@@ -51,7 +54,7 @@
     </main>
 
     <footer class="mt-auto py-3 text-center">
-      <p class="m-0">Conquest of Paradise — CA2 Project, For Learning Purposes</p>
+      <p class="m-0 footer-note">Conquest of Paradise -- CA2 Project, For Learning Purposes</p>
     </footer>
 
     <script src="./js/navBar.js"></script>

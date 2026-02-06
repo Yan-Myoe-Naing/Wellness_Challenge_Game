@@ -1,70 +1,123 @@
-const model = require("../models/userCompletionModel.js");
+const model = require("../models/userCompletionModel");
+const challengeModel = require("../models/wellnessChallengeModel");
+const userModel = require("../models/userModel");
 
-// Get all challenges
-module.exports.readAllCompletion = (req, res, next) => {
-  const callback = (error, results, fields) => {
-    if (error) {
-      console.log("Error readAllCompletion:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error in getting all completions" });
-    } else {
-      res.locals.allCompletion = results;
-      next();
-    }
-  };
 
-  model.selectAll(callback);
-};
-
-//Get completion with ID
+// Read completion by id.
 module.exports.readCompletionById = (req, res, next) => {
   const data = {
     completion_id: req.params.completion_id,
   };
 
-  const callback = (error, results, fields) => {
+  const callback = (error, results) => {
     if (error) {
-      console.log(error);
-      res
+      return res
         .status(500)
         .json({ message: "Internal server error in getting completion by ID" });
-    } else {
-      if (results.length == 0) {
-        res.status(404).json({ message: "Completion not found" });
-      } else {
-        res.locals.completion = results[0];
-        next();
-      }
     }
+
+    if (!results.length) {
+      return res.status(404).json({ message: "Completion not found" });
+    }
+
+    res.locals.completion = results[0];
+    next();
   };
 
   model.selectById(data, callback);
 };
 
-//Get completion with user_id
-module.exports.readCompletionByUserId = (req, res, next) => {
+
+// Read challenge by id for completion.
+module.exports.readChallengeByIdForCompletion = (req, res, next) => {
   const data = {
-    user_id: res.locals.userId || res.locals.user.id,
+    challenge_id: res.locals.completion.challenge_id,
   };
 
-  const callback = (error, results, fields) => {
+  const callback = (error, results) => {
     if (error) {
-      console.log(error);
-      res
+      return res
         .status(500)
-        .json({
-          message: "Internal server error in getting completion by user_id",
-        });
-    } else {
-      if (results.length == 0) {
-        res.status(404).json({ message: "User or completion not found" });
-      } else {
-        res.locals.completionByUser = results;
-        next();
-      }
+        .json({ message: "Internal server error in getting challenge by ID" });
     }
+
+    if (!results.length) {
+      return res.status(404).json({ message: "Challenge not found" });
+    }
+
+    res.locals.challenge = results[0];
+    next();
   };
 
-  model.selectByUserId(data, callback);
+  challengeModel.selectById(data, callback);
+};
+
+
+// Read user for completion.
+module.exports.readUserForCompletion = (req, res, next) => {
+  const data = {
+    user_id: res.locals.userId,
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      return res
+        .status(500)
+        .json({ message: "Internal server error in getting user by token" });
+    }
+
+    if (!results.length) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.locals.user = results[0];
+    next();
+  };
+
+  userModel.selectSelf(data, callback);
+};
+
+
+// Deduct points.
+module.exports.deductPoints = (req, res, next) => {
+  const data = {
+    id: res.locals.userId,
+    points: res.locals.newPoints,
+  };
+
+  const callback = (error) => {
+    if (error) {
+      return res
+        .status(500)
+        .json({ message: "Internal server error in reducing points" });
+    }
+
+    next();
+  };
+
+  userModel.updatePointsById(data, callback);
+};
+
+
+// Delete completion by id.
+module.exports.deleteCompletionById = (req, res, next) => {
+  const data = {
+    completion_id: req.params.completion_id,
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      return res
+        .status(500)
+        .json({ message: "Internal server error deleting completion" });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "Completion not found" });
+    }
+
+    next();
+  };
+
+  model.deleteById(data, callback);
 };
