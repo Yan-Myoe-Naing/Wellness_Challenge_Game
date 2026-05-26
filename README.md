@@ -1,3 +1,10 @@
+## Game Summary
+
+Wellness Strategy Game is a simple CRUD-based strategy game where players build their own empire by completing wellness challenges.
+
+Players can earn points, create cities, recruit armies, form diplomacy relationships, and battle other players. The game combines healthy habits with strategy gameplay, so progress comes from completing wellness tasks instead of only fighting.
+
+
 ## Frontend API Usage
 
 **Base URL:** `http://localhost:3000/api`  
